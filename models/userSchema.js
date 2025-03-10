@@ -1,4 +1,3 @@
-
 // models/userSchema.js
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
@@ -15,8 +14,10 @@ const userSchema = new Schema({
     referalCode: { type: String },
     redeemed: { type: Boolean },
     redeemedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    profileImage: { type: String, default: '/images/default-profile.jpg' }
+    profileImage: { type: String, default: '/images/default-profile.jpg' },
+    otp: { type: String, default: null }, // Store OTP
+    otpExpiresAt: { type: Date, default: null }, // OTP expiration timestamp
+    isVerified: { type: Boolean, default: false } // Track email verification
 }, { timestamps: true });
-
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Order Successful | ChronoCraft</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/order-success.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <%- include('../partials/user/header.ejs') %>
+
+    <div class="container mt-5 pt-5"> <!-- Adjusted for fixed header -->
+        <div class="card text-center p-4">
+            <div class="success-icon mb-3">
+                <span class="checkmark">✓</span>
+            </div>
+            <h2>Thank you for your order!</h2>
+            <p class="text-muted">Your order has been successfully placed and confirmed. We'll send you a shipping confirmation email once your order ships.</p>
+
+            <div class="card mt-4 p-3">
+                <h5>Order Information</h5>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <p><strong>Order Number</strong></p>
+                        <p>#<%= order.orderNumber %></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Order Date</strong></p>
+                        <p><%= new Date(order.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Payment Method</strong></p>
+                        <p><%= order.payment.method %></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Payment Status</strong></p>
+                        <p><%= order.payment.status %></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4 p-3">
+                <h5>Order Items</h5>
+                <% order.items.forEach(item => { %>
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="<%= item.product.variants[item.variantIndex].productImages[0] %>" 
+                             alt="<%= item.product.productName %>" 
+                             class="success-product-image me-3">
+                        <div class="flex-grow-1">
+                            <h6><%= item.product.productName %></h6>
+                            <p class="text-muted">Color: <%= item.product.variants[item.variantIndex].colorName %> | Qty: <%= item.quantity %></p>
+                            <p class="fw-bold">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <div class="card mt-4 p-3">
+                <h5>Delivery Address</h5>
+                <p>
+                    <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, 
+                    <%= order.shippingAddress.state %> - <%= order.shippingAddress.pincode %>
+                </p>
+            </div>
+
+            <div class="card mt-4 p-3">
+                <h5>Price Details</h5>
+                <p>Items Total: ₹<%= order.pricing ? order.pricing.subtotal.toLocaleString('en-IN') : '0' %></p>
+                <p>GST (12%): ₹<%= order.pricing ? (order.pricing.subtotal * 0.12).toLocaleString('en-IN') : '0' %></p> <!-- Dynamic GST calculation -->
+                <p>Shipping Fee: ₹<%= order.pricing ? order.pricing.shippingFee.toLocaleString('en-IN') : '0' %></p>
+                <p><strong>Total Amount</strong>: ₹<%= order.pricing ? order.pricing.finalAmount.toLocaleString('en-IN') : '0' %></p>
+            </div>
+
+            <div class="mt-4">
+                <a href="/user/order/<%= order._id %>" class="btn btn-primary me-2">View Order Details</a>
+                <a href="/user/shop" class="btn btn-secondary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer.ejs') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

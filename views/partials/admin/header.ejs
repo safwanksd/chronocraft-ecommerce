@@ -1,0 +1,184 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        /* Custom styles for dark grey and white theme, matching the provided image */
+        .header {
+            background-color: #2d2d2d; /* Dark grey background */
+            color: #ffffff; /* White text */
+            padding: 1.5rem 2rem; /* Increased padding for more height and spacing */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444; /* Subtle border for separation */
+            font-family: 'Arial', sans-serif; /* Similar to the sleek font in the image */
+            font-weight: 500; /* Matching font weight */
+            height: 80px; /* Increased header height */
+        }
+
+        .profile-icon {
+            color: #080808; /* White icon */
+            cursor: pointer;
+            font-size: 2rem; /* Slightly larger icon for better visibility */
+            margin-left: 1rem; /* Added spacing to the left for clarity */
+        }
+
+        #profileDropdown {
+            background-color: #2d2d2d; /* Dark grey dropdown */
+            border: 1px solid #444; /* Border matching header */
+            color: #ffffff; /* White text */
+            display: none;
+            position: absolute;
+            right: 20px; /* Adjusted positioning for better alignment */
+            top: 80px; /* Adjusted to match new header height */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000; /* Ensure it stays above other elements */
+        }
+
+        #profileDropdown a {
+            color: #ffffff; /* White links */
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            display: block;
+        }
+
+        #profileDropdown a:hover {
+            background-color: #444; /* Slightly lighter grey on hover */
+        }
+
+        .logo-container {
+            max-width: 250px; /* Increased width for a better fit of landscape logo */
+            height: auto;
+            padding: 01rem; /* Added padding for proper spacing around the logo */
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            object-fit: contain; /* Ensures the image fits properly while maintaining aspect ratio */
+        }
+    </style>
+</head>
+
+<header class="header">
+    <div class="d-flex align-items-center">
+        <div class="logo-container">
+            <img src="/images/Chronocraft-logo-transp-copy.png" alt="ChronoCraft Logo" onerror="this.style.display='none';">
+        </div>
+    </div>
+    <div class="d-flex align-items-center position-relative">
+        <i class='bx bx-user-circle profile-icon' style="font-size: 2rem; cursor: pointer;" onclick="toggleDropdown()"></i>
+        <div id="profileDropdown" class="dropdown-menu">
+            <a href="#" class="dropdown-item">Profile</a>
+            <a href="/admin/logout" class="dropdown-item">Logout</a>
+        </div>
+    </div>
+</header>
+
+<script>
+    function toggleDropdown() {
+        var dropdown = document.getElementById("profileDropdown");
+        dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+    }
+
+    document.addEventListener("click", function(event) {
+        var dropdown = document.getElementById("profileDropdown");
+        var profileIcon = document.querySelector(".profile-icon");
+
+        if (!profileIcon.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    window.onpopstate = function(event) {
+        history.go(1); // Prevent back navigation
+    };
+
+    // Toast notification function for consistency (to be used across pages)
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+        toast.style.zIndex = '1050';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        setTimeout(() => {
+            bsToast.hide();
+            toast.remove();
+        }, 3000); // Auto-hide after 3 seconds
+    }
+</script>
+
+
+<!-- <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <link rel="stylesheet" href="/css/admin-style.css">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+</head>
+
+
+
+<header class="header">
+    <div class="d-flex align-items-center">
+        <h4 class="m-0" style="color: var(--first-color); font-weight: bold;">ChronoCraft</h4>
+    </div>
+    <div class="d-flex align-items-center position-relative">
+        <i class='bx bx-user-circle profile-icon' style="font-size: 1.8rem; cursor: pointer; color: var(--first-color);" onclick="toggleDropdown()"></i>
+        <div id="profileDropdown" class="dropdown-menu">
+            <a href="#" class="dropdown-item">Profile</a>
+            <a href="/admin/logout" class="dropdown-item">Logout</a>
+        </div>
+    </div>
+</header>
+
+<script>
+    function toggleDropdown() {
+        var dropdown = document.getElementById("profileDropdown");
+        dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+    }
+
+    document.addEventListener("click", function(event) {
+        var dropdown = document.getElementById("profileDropdown");
+        var profileIcon = document.querySelector(".profile-icon");
+
+        if (!profileIcon.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+}
+
+window.onpopstate = function(event) {
+    history.go(1); // Prevent back navigation
+};
+
+</script> -->

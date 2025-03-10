@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Order Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <style>
+        /* Custom styles for order management, matching white/black/grey with navy blue accents */
+        .content {
+            margin-left: 200px; /* Match sidebar width */
+            padding: 20px;
+            background-color: #f8f9fa; /* Light grey background */
+        }
+
+        .table {
+            background-color: #ffffff; /* White table background */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .status-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .status-pending { background-color: #ffcc00; color: #000; } /* Yellow for Pending */
+        .status-shipped { background-color: #17a2b8; color: #fff; } /* Cyan for Shipped */
+        .status-out-for-delivery { background-color: #28a745; color: #fff; } /* Green for Out for Delivery */
+        .status-delivered { background-color: #007bff; color: #fff; } /* Navy blue for Delivered */
+        .status-cancelled { background-color: #dc3545; color: #fff; } /* Red for Cancelled */
+
+        .btn-primary { background-color: #007bff; border-color: #007bff; } /* Navy blue buttons */
+        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+
+        .pagination .page-link {
+            color: #007bff; /* Navy blue pagination links */
+            border-radius: 5px;
+            margin: 0 2px;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/admin/header.ejs') %>
+    <%- include('../partials/admin/sidebar.ejs') %>
+
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Order Management</h2>
+        </div>
+
+        <!-- Simplified Search Form -->
+        <form action="/admin/orders" method="GET" class="mb-4 d-flex gap-2">
+            <div class="input-group w-50">
+                <input type="text" name="search" class="form-control" placeholder="Search by Order ID or Customer..." value="<%= search %>">
+                <button type="submit" class="btn btn-outline-secondary">Search</button>
+            </div>
+            <a href="/admin/orders/clear" class="btn btn-secondary">Clear Search</a>
+        </form>
+
+        <!-- Orders Table -->
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td>#<%= order.orderNumber %></td>
+                            <td><%= order.user?.name || 'N/A' %> (<%= order.user?.email || 'N/A' %>)</td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %> <%= new Date(order.createdAt).toLocaleTimeString() %></td>
+                            <td>
+                                <% if (order.orderStatus === 'Cancelled') { %>
+                                    <span class="status-cancelled">Cancelled</span>
+                                <% } else { %>
+                                    <select class="form-select status-btn w-75" data-order-id="<%= order._id %>" onchange="updateOrderStatus(this)">
+                                        <% orderStatuses.forEach(status => { %>
+                                            <% if (status !== 'Processing' || order.orderStatus === 'Processing') { %>
+                                                <option value="<%= status %>" <%= order.orderStatus === status ? 'selected' : '' %>><%= status %></option>
+                                            <% } %>
+                                        <% }); %>
+                                    </select>
+                                <% } %>
+                            </td>
+                            <td>
+                                <%= order.payment.method === 'cod' ? 'COD' : 'RAZORPAY' %>
+                                <span class="ms-2 <%= order.payment.status === 'Completed' ? 'text-success' : order.payment.status === 'Pending' ? 'text-warning' : order.payment.status === 'Failed' ? 'text-danger' : 'text-danger' %>">
+                                    <%= order.payment.status === 'Order Cancelled' ? 'Order Cancelled' : order.payment.status %>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/admin/orders/<%= order._id %>" class="btn btn-primary btn-sm">View Details</a>
+                                <% if (order.items.some(item => item.status.return.requested)) { %>
+                                    <button class="btn btn-warning btn-sm mt-2 verify-return" data-order-id="<%= order._id %>">Verify Return</button>
+                                <% } else if (order.items.some(item => item.status.return.status === 'Approved')) { %>
+                                    <span class="text-success mt-2 d-block">Return Approved</span>
+                                <% } else if (order.items.some(item => item.status.return.status === 'Rejected')) { %>
+                                    <span class="text-danger mt-2 d-block">Return Rejected</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- No Results Message -->
+        <% if (noResults) { %>
+            <div class="alert alert-info mt-4">No orders found matching your search term.</div>
+        <% } %>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                    Showing <%= (currentPage - 1) * limit + 1 %>-<%= Math.min(currentPage * limit, totalOrders) %> 
+                    of <%= totalOrders %> orders
+                </div>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="/admin/orders?page=1<%= search ? '&search=' + search : '' %>">First</a>
+                        </li>
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="/admin/orders?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>">Previous</a>
+                        </li>
+                        <% for(let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                <a class="page-link" href="/admin/orders?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+                            </li>
+                        <% } %>
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="/admin/orders?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>">Next</a>
+                        </li>
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="/admin/orders?page=<%= totalPages %><%= search ? '&search=' + search : '' %>">Last</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    // Update Order Status via AJAX with cancellation confirmation
+    async function updateOrderStatus(select) {
+        const orderId = select.getAttribute('data-order-id');
+        const status = select.value;
+
+        // Show confirmation for cancellation
+        if (status === 'Cancelled') {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'Are you sure to cancel this order?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            });
+            if (!result.isConfirmed) {
+                select.value = select.options[select.selectedIndex].value; // Revert if cancelled
+                return;
+            }
+        }
+
+        try {
+            const response = await fetch(`/admin/orders/${orderId}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: data.message, // This should show "Order status updated successfully"
+                    confirmButtonText: 'OK'
+                });
+
+                // Update status column dynamically
+                const statusCell = select.closest('td');
+                if (data.newStatus === 'Processing') {
+                    statusCell.innerHTML = `<select class="form-select status-btn w-75" data-order-id="${orderId}" onchange="updateOrderStatus(this)">` +
+                        '<% orderStatuses.forEach(status => { %>' +
+                        '<% if (status !== "Processing" || "' + order.orderStatus + '" === "Processing") { %>' +
+                        `<option value="${status}" ${data.newStatus === status ? 'selected' : ''}>${status}</option>` +
+                        '<% } %>' +
+                        '<% }); %></select>';
+                } else if (data.newStatus === 'Delivered') {
+                    statusCell.innerHTML = `<span class="status-delivered">Delivered</span>`;
+                } else if (data.newStatus === 'Cancelled') {
+                    statusCell.innerHTML = `<span class="status-cancelled">Cancelled</span>`;
+                } else if (data.newStatus === 'Failed') {
+                    statusCell.innerHTML = `<span class="status-failed">Failed</span>`;
+                } else if (data.newStatus === 'Returned') {
+                    statusCell.innerHTML = `<span class="status-returned">Returned</span>`;
+                }
+
+                // Update payment status color if delivered or cancelled
+                const paymentCell = select.closest('tr').querySelector('td:nth-child(5)');
+                if (paymentCell) {
+                    if (data.newStatus === 'Delivered' && data.paymentStatus === 'Completed') {
+                        paymentCell.innerHTML = `COD <span class="ms-2 text-success">Completed</span>`;
+                    } else if (data.newStatus === 'Cancelled' && data.paymentStatus === 'Order Cancelled') {
+                        paymentCell.innerHTML = `COD <span class="ms-2 text-danger">Order Cancelled</span>`;
+                    }
+                }
+
+                // Update return button/status dynamically if return is requested
+                const actionsCell = select.closest('tr').querySelector('td:nth-child(6)');
+                if (actionsCell && data.returnRequested) {
+                    actionsCell.innerHTML = `<a href="/admin/orders/${orderId}" class="btn btn-primary btn-sm">View Details</a>` +
+                        `<button class="btn btn-warning btn-sm mt-2 verify-return" data-order-id="${orderId}">Verify Return</button>`;
+                } else if (actionsCell) {
+                    let returnStatus = data.returnStatus.find(status => status === 'Approved' || status === 'Rejected');
+                    if (returnStatus === 'Approved') {
+                        actionsCell.innerHTML = `<a href="/admin/orders/${orderId}" class="btn btn-primary btn-sm">View Details</a>` +
+                            `<span class="text-success mt-2 d-block">Return Approved</span>`;
+                    } else if (returnStatus === 'Rejected') {
+                        actionsCell.innerHTML = `<a href="/admin/orders/${orderId}" class="btn btn-primary btn-sm">View Details</a>` +
+                            `<span class="text-danger mt-2 d-block">Return Rejected</span>`;
+                    } else {
+                        actionsCell.innerHTML = `<a href="/admin/orders/${orderId}" class="btn btn-primary btn-sm">View Details</a>`;
+                    }
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to update order status',
+                    confirmButtonText: 'OK'
+                });
+                select.value = select.options[select.selectedIndex].value; // Revert if failed
+            }
+        } catch (error) {
+            console.error("❌ Frontend Error updating order status:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Server error: ${error.message}`,
+                confirmButtonText: 'OK'
+            });
+            select.value = select.options[select.selectedIndex].value; // Revert if failed
+        }
+    }
+    
+        // Verify Return Request via AJAX with dynamic update
+        document.querySelectorAll('.verify-return').forEach(button => {
+            button.addEventListener('click', async function() {
+                const orderId = this.getAttribute('data-order-id');
+    
+                Swal.fire({
+                    title: 'Verify Return Request',
+                    text: 'Do you want to approve or reject this return?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Approve',
+                    cancelButtonText: 'Reject',
+                    reverseButtons: true
+                }).then(async (result) => {
+                    if (result.isConfirmed || result.dismiss === Swal.DismissReason.cancel) {
+                        const action = result.isConfirmed ? 'approve' : 'reject';
+                        try {
+                            const response = await fetch(`/admin/returns/${orderId}/verify`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action })
+                            });
+    
+                            const data = await response.json();
+                            if (data.success) {
+                                showToast(`Return request ${action === 'approve' ? 'approved' : 'rejected'} successfully`, 'success');
+    
+                                // Update actions cell dynamically
+                                const actionsCell = this.closest('td');
+                                if (action === 'approve') {
+                                    actionsCell.innerHTML = `<a href="/admin/orders/${orderId}" class="btn btn-primary btn-sm">View Details</a>` +
+                                        `<span class="text-success mt-2 d-block">Return Approved</span>`;
+                                } else {
+                                    actionsCell.innerHTML = `<a href="/admin/orders/${orderId}" class="btn btn-primary btn-sm">View Details</a>` +
+                                        `<span class="text-danger mt-2 d-block">Return Rejected</span>`;
+                                }
+                            } else {
+                                showToast('Failed to verify return request', 'danger');
+                            }
+                        } catch (error) {
+                            console.error("❌ Error verifying return:", error);
+                            showToast('Server error', 'danger');
+                        }
+                    }
+                });
+            });
+        });
+    
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '1050';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+    
+            setTimeout(() => {
+                bsToast.hide();
+                toast.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

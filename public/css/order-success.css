@@ -1,0 +1,33 @@
+/* order-success.css */
+.success-icon {
+    font-size: 48px;
+    color: #28a745;
+}
+
+.success-product-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.checkmark {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #28a745;
+    color: white;
+    line-height: 60px;
+    text-align: center;
+}
+
+/* Ensure proper spacing with the new GST line */
+.card p {
+    margin-bottom: 0.5rem; /* Consistent spacing between price detail lines */
+}

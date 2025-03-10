@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoCraft - Sign Up</title>
+    <link rel="stylesheet" href="/css/signup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="/js/signup.js" defer></script>
+</head>
+<body>
+    <div class="signup-container">
+        <!-- Left Side: Full-Size Image -->
+        <div class="signup-image">
+            <img src="/images/signup image.png" alt="Model Wearing Watch" class="image">
+        </div>
+
+        <!-- Right Side: Signup Form Card -->
+        <div class="signup-form">
+            <div class="signup-card">
+                <div class="logo-space">
+                    <img src="/images/Chronocraft Logo 2 transp copy.png" alt="CHRONOCRAFT Logo" class="logo">
+                </div>
+                <h1 class="welcome-text">Sign-up</h1>
+                <form id="signupForm" class="signup-form-content">
+                    <div class="form-group">
+                        <input type="text" id="fullName" name="fullName" placeholder="Full Name" required>
+                        <div id="error1" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Email" required>
+                        <div id="error2" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="tel" id="phone" name="phone" placeholder="Phone Number" required>
+                        <div id="error3" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
+                        <div id="error4" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                        <i class="fas fa-eye password-toggle" id="confirmPasswordToggle"></i>
+                        <div id="error5" class="error-message"></div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Sign Up</button>
+
+                    <div class="form-footer">
+                        <p>Already have an account? <a href="/user/login" class="text-link">Log In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const signupForm = document.getElementById("signupForm");
+            const nameid = document.getElementById("fullName");
+            const emailid = document.getElementById("email");
+            const phoneid = document.getElementById("phone");
+            const passid = document.getElementById("password");
+            const cpassid = document.getElementById("confirmPassword");
+
+            const error1 = document.getElementById("error1");
+            const error2 = document.getElementById("error2");
+            const error3 = document.getElementById("error3");
+            const error4 = document.getElementById("error4");
+            const error5 = document.getElementById("error5");
+
+            const namePattern = /^[a-zA-Z\s]{2,50}$/;
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const phonePattern = /^[6-9]\d{9}$/;
+            const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
+
+            // Toastify Configuration
+            function showToast(message, type = 'error') {
+                const backgroundColor = type === 'success' ? '#d4a017' : '#ff4d4d';
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: backgroundColor,
+                        color: type === 'success' ? '#000' : '#f5f5f5',
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontSize: '0.9rem',
+                        fontWeight: '400',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                    }
+                }).showToast();
+            }
+
+            function validateField(input, pattern, errorElement, errorMessage) {
+                if (!pattern.test(input.value.trim())) {
+                    errorElement.style.display = "block";
+                    errorElement.innerHTML = errorMessage;
+                    return false;
+                } else {
+                    errorElement.style.display = "none";
+                    errorElement.innerHTML = "";
+                    return true;
+                }
+            }
+
+            function validatePasswordMatch() {
+                if (passid.value !== cpassid.value) {
+                    error5.style.display = "block";
+                    error5.innerHTML = "Passwords do not match!";
+                    return false;
+                } else {
+                    error5.style.display = "none";
+                    return true;
+                }
+            }
+
+            nameid.addEventListener("input", () => validateField(nameid, namePattern, error1, "Name should only contain letters & spaces."));
+            emailid.addEventListener("input", () => validateField(emailid, emailPattern, error2, "Invalid email format."));
+            phoneid.addEventListener("input", () => validateField(phoneid, phonePattern, error3, "Enter a valid 10-digit phone number."));
+            passid.addEventListener("input", () => validateField(passid, passwordPattern, error4, "Password must have min 6 characters, including a number."));
+            cpassid.addEventListener("input", validatePasswordMatch);
+
+            const passwordToggle = document.getElementById('passwordToggle');
+            const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+
+            if (passwordToggle) {
+                passwordToggle.addEventListener('click', function() {
+                    const passwordInput = document.getElementById('password');
+                    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            if (confirmPasswordToggle) {
+                confirmPasswordToggle.addEventListener('click', function() {
+                    const confirmPasswordInput = document.getElementById('confirmPassword');
+                    confirmPasswordInput.type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            if (signupForm) {
+                signupForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const isNameValid = validateField(nameid, namePattern, error1, "Name should only contain letters & spaces.");
+                    const isEmailValid = validateField(emailid, emailPattern, error2, "Invalid email format.");
+                    const isPhoneValid = validateField(phoneid, phonePattern, error3, "Enter a valid 10-digit phone number.");
+                    const isPasswordValid = validateField(passid, passwordPattern, error4, "Password must have min 6 characters, including a number.");
+                    const isPasswordMatch = validatePasswordMatch();
+
+                    if (!(isNameValid && isEmailValid && isPhoneValid && isPasswordValid && isPasswordMatch)) {
+                        return;
+                    }
+
+                    const fullName = nameid.value.trim();
+                    const email = emailid.value.trim();
+                    const phone = phoneid.value.trim();
+                    const password = passid.value;
+
+                    try {
+                        const response = await fetch('/user/signup', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ fullName, email, phone, password, confirmPassword: password }),
+                        });
+
+                        const data = await response.json();
+                        console.log('Server response:', data);
+
+                        if (data.success) {
+                            showToast('Signup successful! Redirecting...', 'success');
+                            setTimeout(() => {
+                                window.location.href = data.redirectUrl;
+                            }, 2000); // Redirect after 2 seconds
+                        } else {
+                            showToast(data.message || 'Signup failed');
+                        }
+                    } catch (error) {
+                        console.error('Error during signup:', error);
+                        showToast('An error occurred. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

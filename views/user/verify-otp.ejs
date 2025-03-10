@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - ChronoCraft</title>
+    <link rel="stylesheet" href="/css/verify-otp.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="otp-container">
+        
+        <!-- Right Side: OTP Verification Card -->
+        <div class="otp-form">
+            <div class="otp-card">
+                <div class="logo-space">
+                    <img src="/images/Chronocraft Logo 2 transp copy.png" alt="CHRONOCRAFT Logo" class="logo">
+                </div>
+                <h2 class="welcome-text">OTP Verification</h2>
+                <p class="info-text">Check your email for the verification code.</p>
+                <p class="info-subtext">OTP sent to your mail</p>
+
+                <form id="otpForm">
+                    <div class="form-group">
+                        <input type="text" name="otp" id="otp" maxlength="6" placeholder="Enter 6-digit code" required>
+                    </div>
+                    <p id="timer" class="timer-text">4:00</p>
+                    <button type="submit" id="verifyBtn" class="submit-btn" disabled>Verify OTP</button>
+                    <button type="button" id="resendBtn" class="resend-btn" disabled>Resend Code</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Left Side: Full-Size Image -->
+        <div class="otp-image">
+            <img src="https://i.pinimg.com/736x/9f/44/d6/9f44d613370343fba21d9c49e27b0eba.jpg" alt="Watch Image" class="image">
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        let timeLeft = 30; // 4 minutes in seconds
+        const timerElement = document.getElementById("timer");
+        const resendBtn = document.getElementById("resendBtn");
+        const verifyBtn = document.getElementById("verifyBtn");
+        const otpInput = document.getElementById("otp");
+
+        // Custom SweetAlert2 styling to match theme
+        const swalOptions = {
+            customClass: {
+                popup: 'swal-popup',
+                title: 'swal-title',
+                content: 'swal-content',
+                confirmButton: 'swal-confirm',
+            },
+            background: '#141414',
+            color: '#f5f5f5',
+            confirmButtonColor: '#d4a017',
+            confirmButtonText: 'OK',
+        };
+
+        // Countdown Timer Function
+        function startTimer() {
+            resendBtn.disabled = true;
+            resendBtn.classList.add("disabled");
+            resendBtn.classList.remove("active");
+
+            let timerInterval = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove("disabled");
+                    resendBtn.classList.add("active");
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        // Start Timer on Page Load
+        startTimer();
+
+        // Enable Verify OTP Button on Input
+        otpInput.addEventListener("input", () => {
+            verifyBtn.disabled = otpInput.value.length !== 6;
+        });
+
+        // Handle Resend OTP Click
+        resendBtn.addEventListener("click", async () => {
+            try {
+                resendBtn.innerText = "Resending...";
+                resendBtn.disabled = true;
+
+                const response = await fetch("/user/resend-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: "Success",
+                        text: "OTP has been resent to your email.",
+                        icon: "success",
+                        ...swalOptions
+                    });
+                    timeLeft = 60; // Reset to 1 minutes
+                    startTimer();
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Failed to resend OTP. Try again.",
+                        icon: "error",
+                        ...swalOptions
+                    });
+                    resendBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Something went wrong. Please try again.",
+                    icon: "error",
+                    ...swalOptions
+                });
+                resendBtn.disabled = false;
+            }
+
+            resendBtn.innerText = "Resend Code";
+        });
+
+
+        verifyBtn.addEventListener("click", async function(e){
+            const otpInput = document.getElementById("otp").value.trim()
+            e.preventDefault();
+
+
+            const response = await fetch('/user/verify-otp',{
+                method:"post",
+               headers:{
+                "Content-Type":"application/json",
+               },
+               body:JSON.stringify({otp:otpInput})
+            })
+
+            const data = await response.json();
+
+            console.log("data",data)
+
+            if(data.success){
+                Swal.fire({
+                    icon:"success",
+                    title:"done",
+                    text:"otp verified successfully",
+                    timer:1500
+                }).then(()=>{
+                    window.location.href = data.redirectUrl
+                })
+            }else{
+                Swal.fire({
+                    icon:"error",
+                    title:"error",
+                    text:data.message
+                });
+            }
+        })
+
+
+    </script>
+</body>
+</html>

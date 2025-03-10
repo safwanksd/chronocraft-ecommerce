@@ -1,0 +1,152 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        /* Custom styles for dark grey and white theme, matching the provided image */
+        .sidebar {
+            background-color: #2d2d2d; /* Dark grey background */
+            color: #ffffff; /* White text */
+            width: 200px; /* Reduced width for compactness */
+            height: calc(100vh - 80px); /* Adjusted height to avoid overlapping header (80px header height) */
+            position: fixed;
+            top: 80px; /* Position below the header (80px height) */
+            left: 0;
+            padding: 1rem 0.5rem; /* Reduced padding for compactness */
+            font-family: 'Poppins', sans-serif; /* Matching font similar to the image (sleek, modern) */
+            font-weight: 400; /* Lighter font weight for elegance */
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+            z-index: 900; /* Ensure it stays below header but above content */
+        }
+
+        .sidebar a {
+            color: #ffffff; /* White links */
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.8rem; /* Reduced padding for compactness */
+            margin-bottom: 0.3rem; /* Reduced margin for compactness */
+            border-radius: 4px; /* Rounded corners like the image */
+            transition: background-color 0.2s ease; /* Quick, smooth hover effect */
+            font-size: 0.9rem; /* Smaller font size for compactness */
+        }
+
+        .sidebar a i {
+            margin-right: 0.6rem; /* Reduced spacing between icon and text */
+            font-size: 1.1rem; /* Slightly smaller icons for compactness */
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #444; /* Slightly lighter grey on hover/active */
+            color: #ffffff; /* Ensure text remains white */
+        }
+
+        .sidebar a.active {
+            background-color: #ffffff; /* White background for active state, matching image */
+            color: #2d2d2d; /* Dark grey text for contrast, matching image */
+            font-weight: 500; /* Slightly bolder for emphasis */
+            border-left: 4px solid #2d2d2d; /* Dark grey left border, matching image */
+        }
+    </style>
+</head>
+
+<nav class="sidebar">
+    <a href="/admin/dashboard"><i class='bx bx-grid-alt'></i> Dashboard</a>
+    <a href="/admin/orders"><i class='bx bx-cart'></i> Orders</a>
+    <a href="/admin/products"><i class='bx bx-box'></i> Products</a>
+    <a href="/admin/users"><i class='bx bx-user'></i> Users</a>
+    <a href="/admin/categories"><i class='bx bx-category'></i> Categories</a>
+    <a href="/admin/brands"><i class='bx bx-store'></i> Brands</a>
+    <a href="#"><i class='bx bx-gift'></i> Coupons</a>
+    <a href="#"><i class='bx bx-image'></i> Banners</a>
+    <a href="#"><i class='bx bx-credit-card'></i> Payments</a>
+    <a href="#"><i class='bx bx-tag-alt'></i> Offers</a>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get current path
+        const currentPath = window.location.pathname;
+        
+        // Get all sidebar links
+        const sidebarLinks = document.querySelectorAll('.sidebar a');
+        
+        // Loop through links and add active class to matching path
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    // Toast notification function for consistency (already defined in header, but included here for reference)
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+        toast.style.zIndex = '1050';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        setTimeout(() => {
+            bsToast.hide();
+            toast.remove();
+        }, 3000); // Auto-hide after 3 seconds
+    }
+</script>
+
+
+<!-- <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <link rel="stylesheet" href="/css/admin-style.css">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+</head>
+
+<nav class="sidebar">
+    <a href="/admin/dashboard"><i class='bx bx-grid-alt'></i> Dashboard</a>
+    <a href="#"><i class='bx bx-cart'></i> Orders</a>
+    <a href="/admin/products"><i class='bx bx-box'></i> Products</a>
+    <a href="/admin/users"><i class='bx bx-user'></i> Users</a>
+    <a href="/admin/categories"><i class='bx bx-category'></i> Categories</a>
+    <a href="/admin/brands"><i class='bx bx-store'></i> Brands</a>
+    <a href="#"><i class='bx bx-gift'></i> Coupons</a>
+    <a href="#"><i class='bx bx-image'></i> Banners</a>
+    <a href="#"><i class='bx bx-credit-card'></i> Payments</a>
+    <a href="#"><i class='bx bx-tag-alt'></i> Offers</a>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get current path
+        const currentPath = window.location.pathname;
+        
+        // Get all sidebar links
+        const sidebarLinks = document.querySelectorAll('.sidebar a');
+        
+        // Loop through links and add active class to matching path
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script> -->

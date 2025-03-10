@@ -1,0 +1,288 @@
+  /* home.css */
+  
+  /* Typography */
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+
+  :root {
+      --primary-font: 'Montserrat', sans-serif;
+      --heading-font: 'Cormorant Garamond', serif;
+  }
+
+  body {
+      font-family: var(--primary-font);
+      color: #1a1a1a;
+  }
+
+  
+  /* Hero Section */
+  .hero-section {
+      height: 100vh;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/watch-main-hero-section.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+  }
+
+  .hero-content {
+      color: white;
+      max-width: 600px;
+  }
+
+  .hero-title {
+      font-family: var(--heading-font);
+      font-size: 3.5rem;
+      font-weight: 500;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+  }
+
+  /* Services Section */
+  .services-section {
+      padding: 2rem 0;
+      background: #000000;
+      color: rgb(207, 195, 195);
+  }
+
+  .service-item {
+      text-align: center;
+      padding: 1rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .service-item:last-child {
+      border-right: none;
+  }
+
+  /* Collections Section */
+  .collections-section {
+      padding: 4rem 0;
+      background: white;
+  }
+
+  .section-title {
+      font-family: var(--heading-font);
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 2.5rem;
+      letter-spacing: 1px;
+      color: #000;
+  }
+
+  .collection-card {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      aspect-ratio: 2/3;
+  }
+
+  .collection-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+  }
+
+  .collection-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+  }
+
+  .collection-title {
+      font-family: var(--heading-font);
+      margin: 0;
+      font-size: 1.5rem;
+      text-align: center;
+      letter-spacing: 2px;
+  }
+
+  /* Style for "SHOP FOR HIM" and "SHOP FOR HER" */
+  .title-bordered {
+      color: #000;
+      padding: 10px 20px;
+      border: 0.3px solid #4e4d4d;
+      border-radius: 10px 10px;
+  }
+
+  /* Special style for "EXPLORE" */
+  .title-explore {
+      color: #fff;
+      padding: 10px 20px;
+      border: 0.1px solid #4e4d4d;
+      border-radius: 10px 10px;
+      background-color: rgba(128, 128, 128, 0.5);
+      backdrop-filter: blur(2px);
+  }
+
+  /* Hover effects */
+  .collection-card:hover .collection-image {
+      transform: scale(1.05);
+  }
+
+  .collection-card:hover .title-bordered {
+      background-color: rgba(255, 255, 255, 0.9);
+      transition: background-color 0.3s ease;
+  }
+
+  .collection-card:hover .title-explore {
+      background-color: rgba(128, 128, 128, 0.7);
+      transition: background-color 0.3s ease;
+  }
+
+  /* Featured Products Section */
+.featured-products-section {
+    padding: 4rem 0;
+    background: white;
+}
+
+.featured-products-section .section-title {
+    font-family: var(--heading-font);
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+    color: #000;
+}
+
+.product-card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-card .card-img-top {
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.product-card .card-body {
+    padding: 1.5rem;
+    background: white;
+}
+
+.product-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #1a1a1a;
+}
+
+.product-card .text-shadow {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.product-card .text-gray {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.product-card .btn-black {
+    background-color: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.product-card .btn-black:hover {
+    background-color: #333;
+}
+
+.product-card .btn-black:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+  /* Brands Section */
+  .brands-section {
+      padding: 4rem 0;
+      background: white;
+  }
+
+  .brand-container {
+      padding: 1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+
+  .brand-logo {
+      height: 140px;
+      width: auto;
+      object-fit: contain;
+      opacity: 0.85;
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+  }
+
+  .brand-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .brand-container:hover .brand-logo {
+      opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+      .brand-logo {
+          height: 45px;
+      }
+  }
+
+  /* Watch Showcase Section */
+  .watch-showcase {
+      padding: 4rem 0;
+      background: #000000;
+      min-height: 400px;
+  }
+
+  .showcase-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+  }
+
+  .showcase-text {
+      color: white;
+      font-size: 1.5rem;
+      line-height: 1.8;
+      text-align: center;
+      font-family: var(--heading-font);
+      margin: 0;
+  }
+
+  .showcase-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+      .showcase-text {
+          font-size: 1.25rem;
+          margin-bottom: 2rem;
+      }
+  }

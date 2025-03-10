@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Manage Addresses | CHRONOCRAFT The Watch Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/shop.css"> <!-- Reusing shop.css for consistency -->
+    <link rel="stylesheet" href="/css/profile.css"> <!-- Reusing profile.css for sidebar -->
+    <link rel="stylesheet" href="/css/manage-addresses.css"> <!-- Custom CSS for manage addresses -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <%- include('../partials/user/header') %>
+
+    <div class="container-fluid profile-container mt-5 py-5">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-lg-3 col-md-4 sidebar">
+                <div class="profile-sidebar text-center">
+                    <a href="/user/profile/edit" class="btn btn-black mb-4">Profile Edit</a>
+                    <ul class="nav flex-column sidebar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile">Account Overview</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/orders">My Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/user/profile/addresses">Manage Address</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/wallet">Wallet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile/change-password">Manage Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link logout-btn" href="/user/logout">LOG OUT</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8 main-content">
+                <h2 class="text-center mb-5 text-black text-shadow">Manage Address</h2>
+                <div class="manage-addresses-container card p-4">
+                    <h3 class="subheading mb-4">My Addresses</h3>
+                    <% if (message) { %>
+                        <p class="success-message"><%= message %></p>
+                    <% } %>
+                    <% if (addresses.length > 0) { %>
+                        <ul class="address-list list-unstyled">
+                            <% addresses.forEach((address) => { %>
+                                <li class="address-item mb-3 p-3 border rounded">
+                                    <span class="address-text">
+                                        <%= address.street %>, <%= address.city %>, <%= address.state %> - <%= address.pincode %>
+                                        <% if (address.isDefault) { %> <span class="badge bg-success ms-2">Default</span> <% } %>
+                                    </span>
+                                    <div class="address-actions mt-2">
+                                        <a href="/user/profile/addresses/edit/<%= address._id %>" class="btn btn-sm btn-outline-black me-2">Edit</a>
+                                        <button onclick="confirmDelete('<%= address._id %>')" class="btn btn-sm btn-danger">Delete</button>
+                                    </div>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-muted text-center">No addresses added yet.</p>
+                    <% } %>
+                    <div class="d-flex gap-3 mt-4 justify-content-center">
+                        <a href="/user/profile/addresses/add" class="btn btn-black">Add New Address</a>
+                        <a href="/user/profile" class="btn btn-outline-black">Back to Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer.ejs') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("🟢 Manage Addresses Page Loaded!");
+
+            // Toast container setup
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+
+            // Function to show toast
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+                toast.role = 'alert';
+                toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+                toastContainer.appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+                setTimeout(() => toast.remove(), 5000);
+            }
+
+            // Show server-side message if present
+            <% if (message) { %>
+                showToast("<%= message %>", "success");
+            <% } %>
+
+            // Logout functionality
+            document.querySelector(".logout-btn").addEventListener("click", function (event) {
+                event.preventDefault();
+                fetch("/user/logout")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirectUrl;
+                        }
+                    })
+                    .catch(error => console.error("Logout failed:", error));
+            });
+
+            // Delete confirmation with SweetAlert
+            window.confirmDelete = async function (addressId) {
+                const result = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to delete this address?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, keep it',
+                    customClass: {
+                        confirmButton: 'btn btn-black',
+                        cancelButton: 'btn btn-outline-black'
+                    }
+                });
+
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/user/profile/addresses/delete/${addressId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showToast(data.message || "Address deleted successfully!", "success");
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Delete Failed',
+                                text: data.message || "Failed to delete address",
+                                confirmButtonText: 'OK',
+                                customClass: { confirmButton: 'btn btn-black' }
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error deleting address:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Server Error',
+                            text: 'Something went wrong. Please try again later.',
+                            confirmButtonText: 'OK',
+                            customClass: { confirmButton: 'btn btn-black' }
+                        });
+                    }
+                }
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Verify Email | CHRONOCRAFT The Watch Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/shop.css"> <!-- Reusing shop.css for consistency -->
+    <link rel="stylesheet" href="/css/profile.css"> <!-- Reusing profile.css for sidebar -->
+    <link rel="stylesheet" href="/css/verify-email.css"> <!-- Custom CSS for verify email -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <%- include('../partials/user/header') %>
+
+    <div class="container-fluid profile-container mt-5 py-5">
+        <div class="row">
+            <!-- Left Sidebar (Same as Profile Page) -->
+            <div class="col-lg-3 col-md-4 sidebar">
+                <div class="profile-sidebar text-center">
+                    <img src="<%= user.profileImage || '/images/default-profile.jpg' %>" alt="Profile Image" class="profile-img mb-3">
+                    <a href="/user/profile/edit" class="btn btn-black mb-4">Profile Edit</a>
+                    <ul class="nav flex-column sidebar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile">Account Overview</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/orders">My Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile/addresses">Manage Address</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/wallet">Wallet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/password">Manage Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link logout-btn" href="/user/logout">LOG OUT</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8 main-content">
+                <h2 class="text-center mb-5 text-black text-shadow">Verify New Email</h2>
+                <div class="verify-email-container card p-4">
+                    <h3 class="subheading mb-4">Verify New Email</h3>
+                    <p class="text-muted mb-4">
+                        Enter the OTP sent to your new email. It expires in <span id="timer">60</span> seconds.
+                    </p>
+                    <% if (message) { %>
+                        <p class="error-message"><%= message %></p>
+                    <% } %>
+                    <form id="verifyEmailForm" method="POST" action="/user/profile/verify-email">
+                        <div class="mb-3">
+                            <label for="otp" class="form-label">Enter OTP:</label>
+                            <input type="text" class="form-control" id="otp" name="otp" required>
+                            <div id="error" class="error-message mt-2" style="display: none;"></div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-black">Verify</button>
+                            <button type="button" id="resendBtn" class="btn btn-outline-black" style="display: none;" onclick="resendOtp()">Resend OTP</button>
+                            <a href="/user/profile" class="btn btn-outline-black">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer.ejs') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("🟢 Verify Email Page Loaded!");
+
+            // Toast container setup
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+
+            // Function to show toast
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+                toast.role = 'alert';
+                toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+                toastContainer.appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+                setTimeout(() => toast.remove(), 5000);
+            }
+
+            // Logout functionality
+            document.querySelector(".logout-btn").addEventListener("click", function (event) {
+                event.preventDefault();
+                fetch("/user/logout")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirectUrl;
+                        }
+                    })
+                    .catch(error => console.error("Logout failed:", error));
+            });
+
+            // Timer Logic
+            let timeLeft = 60;
+            const timerElement = document.getElementById("timer");
+            const resendBtn = document.getElementById("resendBtn");
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    resendBtn.style.display = "inline-block";
+                    showToast("OTP expired. Please resend.", "danger");
+                }
+            }, 1000);
+
+            // Form Submission
+            document.getElementById("verifyEmailForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const otp = document.getElementById("otp").value.trim();
+                const errorElement = document.getElementById("error");
+
+                try {
+                    const response = await fetch('/user/profile/verify-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ otp })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showToast("Email verified successfully!", "success");
+                        setTimeout(() => window.location.href = "/user/profile", 1500);
+                    } else {
+                        errorElement.style.display = "block";
+                        errorElement.textContent = data.message || "Invalid OTP";
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Verification Failed',
+                            text: data.message || "Invalid OTP",
+                            confirmButtonText: 'OK',
+                            customClass: { confirmButton: 'btn btn-black' }
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error verifying OTP:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong. Please try again later.',
+                        confirmButtonText: 'OK',
+                        customClass: { confirmButton: 'btn btn-black' }
+                    });
+                }
+            });
+
+            // Resend OTP Function
+            window.resendOtp = async function () {
+                try {
+                    const response = await fetch('/user/profile/resend-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showToast("OTP resent successfully!", "success");
+                        timeLeft = 60;
+                        timerElement.textContent = timeLeft;
+                        resendBtn.style.display = "none";
+                        const newTimer = setInterval(() => {
+                            timeLeft--;
+                            timerElement.textContent = timeLeft;
+                            if (timeLeft <= 0) {
+                                clearInterval(newTimer);
+                                resendBtn.style.display = "inline-block";
+                                showToast("OTP expired. Please resend.", "danger");
+                            }
+                        }, 1000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Resend Failed',
+                            text: data.message || "Failed to resend OTP",
+                            confirmButtonText: 'OK',
+                            customClass: { confirmButton: 'btn btn-black' }
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error resending OTP:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong. Please try again later.',
+                        confirmButtonText: 'OK',
+                        customClass: { confirmButton: 'btn btn-black' }
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

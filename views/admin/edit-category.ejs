@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Edit Category</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+    <%- include('../partials/admin/header.ejs') %>
+    <%- include('../partials/admin/sidebar.ejs') %>
+
+    <div class="content">
+        <h2 class="mb-4 text-center">Edit Category</h2>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form id="editCategoryForm">
+                    <input type="hidden" id="categoryId" value="<%= category._id %>">
+                
+                    <div class="mb-3">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" id="categoryName" class="form-control" value="<%= category.name %>" required>
+                    </div>
+                
+                    <div class="mb-3">
+                        <label class="form-label">Category Description</label>
+                        <textarea id="categoryDescription" class="form-control" rows="3"><%= category.description %></textarea>
+                    </div>
+                
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="/admin/categories" class="btn btn-secondary">Cancel</a>
+                </form>                
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    document.getElementById("editCategoryForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const id = document.getElementById("categoryId").value;
+    const name = document.getElementById("categoryName").value.trim();
+    const description = document.getElementById("categoryDescription").value.trim();
+
+    if (!name) {
+        Swal.fire("Warning!", "Category name cannot be empty!", "warning");
+        return;
+    }
+
+    try {
+        console.log("Sending edit request with data:", { id, name, description });
+        
+        const response = await fetch(`/admin/categories/edit/${id}`, {
+            method: "put",
+            headers: { 
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id, name, description })
+        });
+
+        console.log("Response status:", response.status);
+        
+        // Handle non-JSON responses
+        if (!response.ok) {
+     const errorData = await response.json();
+      console.error("Server error response:", errorData);
+    throw new Error(errorData.message || errorData.error || `Server error: ${response.status}`);
+}
+
+        const result = await response.json();
+        console.log("Server response:", result);
+
+        if (result.success) {
+            Swal.fire({
+                title: "Success!",
+                text: result.message,
+                icon: "success"
+            }).then(() => {
+                window.location.href = "/admin/categories";
+            });
+        } else {
+            throw new Error(result.error || "Unknown error occurred");
+        }
+    } catch (error) {
+        console.error("Edit category error:", error);
+        Swal.fire({
+            title: "Error!",
+            text: error.message || "Something went wrong. Try again!",
+            icon: "error"
+        });
+    }
+});
+    </script>     
+</html>

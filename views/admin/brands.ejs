@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Brand Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <%- include('../partials/admin/header.ejs') %>
+    <%- include('../partials/admin/sidebar.ejs') %>
+
+    <div class="content">
+        <h2 class="mb-4 text-center">Brand Management</h2>
+
+        <!-- Add Brand Form -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">Add New Brand</div>
+            <div class="card-body">
+                <form id="addBrandForm">
+                    <input type="text" id="brandName" class="form-control mb-2" placeholder="Enter brand name">
+                    <button type="submit" class="btn btn-success mt-2">Add Brand</button>
+                </form>
+            </div>
+        </div>
+        
+        
+
+        <!-- Search & Reset -->
+        <form action="/admin/brands" method="GET" class="row mb-4">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Search brands..." value="<%= search || '' %>">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+            <div class="col-md-2">
+                <a href="/admin/brands" class="btn btn-secondary w-100">Reset</a>
+            </div>
+        </form>
+
+        <!-- Brand List Table -->
+<div class="table-responsive">
+    <table class="table table-bordered table-hover text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% brands.forEach(brand => { %>
+                <tr>
+                    <td><%= brand.brandName %></td>
+                    <td>
+                        <span class="badge <%= brand.isBlocked ? 'bg-danger' : 'bg-success' %>">
+                            <%= brand.isBlocked ? 'Blocked' : 'Active' %>
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn <%= brand.isBlocked ? 'btn-success' : 'btn-danger' %>"
+                                onclick="toggleBrandStatus('<%= brand._id %>')">
+                            <%= brand.isBlocked ? 'Unblock' : 'Block' %>
+                        </button>
+                        <a href="/admin/brands/edit/<%= brand._id %>" class="btn btn-warning">Edit</a>
+                        <button class="btn btn-danger" onclick="deleteBrand('<%= brand._id %>')">Delete</button>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>            
+</div>
+        <!-- Pagination -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="/admin/brands?page=<%= i %>&search=<%= search || '' %>"><%= i %></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>  
+
+    <script src="/js/brand.js"></script>
+</body>
+</html>

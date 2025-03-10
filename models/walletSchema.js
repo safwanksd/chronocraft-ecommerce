@@ -1,0 +1,61 @@
+// models/walletSchema.js
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
+
+const walletSchema = new Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        unique: true
+    },
+    balance: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    transactions: [
+        {
+            type: {
+                type: String,
+                enum: ['Deposit', 'Withdrawal', 'Purchase', 'Refund', 'Referal'],
+                required: true
+            },
+            amount: {
+                type: Number,
+                required: true
+            },
+            orderId: {
+                type: String,
+                ref: 'Order',
+                required: function() {
+                    return this.type === 'Purchase' || this.type === 'Refund';
+                }
+            },
+            status: {
+                type: String,
+                enum: ['Completed', 'Failed', 'Pending'],
+                default: 'Completed'
+            },
+            description: {
+                type: String,
+                required: false
+            },
+            date: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ],
+    lastUpdated: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+walletSchema.pre('save', function (next) {
+    this.lastUpdated = Date.now();
+    next();
+});
+
+module.exports = mongoose.model('Wallet', walletSchema);

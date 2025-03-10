@@ -1,0 +1,399 @@
+/* shop.css */
+
+/* General Styles */
+body {
+    background-color: #fff; /* White background */
+    color: #000; /* Black text */
+    font-family: var(--primary-font); /* Montserrat for body text */
+    line-height: 1.6;
+}
+
+/* Typography */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+
+:root {
+    --primary-font: 'Montserrat', sans-serif;
+    --heading-font: 'Cormorant Garamond', serif;
+}
+
+/* Headings */
+h2 {
+    font-size: 1.8rem; /* Smaller, elegant heading */
+    font-weight: 600;
+    font-family: var(--heading-font);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 3rem; /* Increased padding from header */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2); /* Softer shadow for white background */
+}
+
+/* Floating Side Panel for Filters (Stable and visible by default) */
+.filter-panel {
+    position: fixed;
+    top: 20%;
+    left: 15px; /* Reduced gap from left (was 20px) */
+    width: 270px; /* Slightly reduced width (was 280px) */
+    height: auto;
+    background-color: #f8f8f8; /* Light gray for panel */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    padding: 0.8rem; /* Reduced padding (was 1rem) */
+    max-width: 270px; /* Reduced max-width (was 280px) */
+    right: auto; /* Prevent overlap with content */
+}
+
+.filter-panel.open {
+    left: 15px; /* Keep it stable and visible (was 20px) */
+    display: block; /* Ensure it stays visible */
+}
+
+.filter-toggle {
+    background-color: #e0e0e0; /* Light gray button background */
+    border: none;
+    color: #000;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem; /* Smaller, compact font */
+    font-weight: 500;
+    text-transform: none; /* Removed uppercase for elegance */
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Floating effect */
+    margin: 0; /* Remove any margin */
+}
+
+.filter-toggle:hover {
+    background-color: #d0d0d0; /* Slightly darker on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.filter-toggle i {
+    margin-right: 6px;
+    font-size: 0.8rem;
+}
+
+.filter-options {
+    padding-top: 0.8rem;
+    transition: all 0.3s ease;
+    display: block; /* Visible by default */
+}
+
+.filter-options .form-control,
+.filter-options .form-select {
+    background-color: #fff; /* White input background */
+    border: 1px solid #ccc;
+    color: #000;
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 0.8rem; /* Smaller, compact font */
+    text-transform: none; /* Removed uppercase for elegance */
+    font-family: var(--primary-font);
+}
+
+.filter-options .form-control::placeholder {
+    color: #666; /* Visible placeholder color */
+}
+
+.filter-options .form-control:focus,
+.filter-options .form-select:focus {
+    background-color: #fff;
+    border-color: #666; /* Dark gray accent for focus */
+    box-shadow: 0 0 0 0.2rem rgba(102, 102, 102, 0.3);
+}
+
+.filter-options .btn-black {
+    background-color: #000; /* Black button */
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem; /* Smaller, compact font */
+    font-weight: 500;
+    text-transform: none; /* Removed uppercase for elegance */
+    font-family: var(--primary-font);
+    transition: all 0.3s ease;
+}
+
+.filter-options .btn-black:hover {
+    background-color: #333; /* Dark gray on hover */
+    transform: translateY(-2px);
+}
+
+.text-gray {
+    color: #666 !important; /* Gray for muted text (brand/category) */
+}
+
+.text-dark {
+    color: #333 !important; /* Dark gray for accents (price) */
+}
+
+.text-shadow {
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2); /* Softer shadow for white background */
+}
+
+/* Product Cards */
+.product-card {
+    background-color: #fff; /* White card background */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    height: 100%;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative; /* Ensure proper positioning for wishlist button */
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(51, 51, 51, 0.2); /* Dark gray-tinted shadow on hover */
+}
+
+.wishlist-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    opacity: 1; /* Ensure visibility */
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent background */
+    border-radius: 50%; /* Circular shape */
+    width: 30px; /* Fixed width */
+    height: 30px; /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-wishlist {
+    background-color: transparent;
+    border: none;
+    color: #ff0000; /* Red color for wishlist heart */
+    font-size: 1rem;
+    padding: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.btn-wishlist:hover {
+    color: #cc0000; /* Darker red on hover */
+    transform: scale(1.1);
+}
+
+.product-card img {
+    height: 250px; /* Adjusted for square images, matching reference */
+    width: 100%;
+    object-fit: cover; /* Ensures square images fit properly */
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover img {
+    opacity: 0.85;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem;
+}
+
+.card-body h5 {
+    font-size: 0.9rem; /* Smaller, elegant font size */
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+    font-family: var(--primary-font);
+    color: #000; /* Black for visibility */
+    line-height: 1.3;
+    text-transform: none; /* Removed uppercase for elegance */
+}
+
+.card-body .text-gray {
+    font-size: 0.75rem; /* Smaller, compact text */
+    margin-bottom: 0.2rem;
+    font-family: var(--primary-font);
+}
+
+.card-body .text-dark {
+    font-size: 0.85rem; /* Smaller, elegant price */
+    font-weight: 500;
+    font-family: var(--primary-font);
+}
+
+.card-body .btn-black {
+    background-color: #000; /* Ensure black button */
+    border: none;
+    color: #fff; /* White text */
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem; /* Smaller, compact button text */
+    font-weight: 500;
+    text-transform: none; /* Removed uppercase for elegance */
+    font-family: var(--primary-font);
+    transition: all 0.3s ease;
+}
+
+.card-body .btn-black:hover {
+    background-color: #333; /* Dark gray on hover */
+    transform: translateY(-2px);
+}
+
+.btn-black { /* Ensure all black buttons are consistent */
+    background-color: #000 !important; /* Black button */
+    border: none !important;
+    color: #fff !important;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+/* Product Container */
+#productContainer {
+    margin: 0 -15px;
+}
+
+#productContainer > div {
+    padding: 0 15px;
+    margin-bottom: 20px;
+}
+
+/* Ensure 4 products per row on large screens, fitting properly and wider */
+.row-cols-lg-4 {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 0;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: calc(var(--bs-gutter-y) * -1);
+    margin-right: calc(var(--bs-gutter-x) * -.5);
+    margin-left: calc(var(--bs-gutter-x) * -.5);
+}
+
+.row-cols-lg-4 > * {
+    flex: 0 0 auto;
+    width: 25%;
+}
+
+/* Pagination Styling */
+.pagination {
+    margin-top: 2rem;
+}
+
+.pagination .page-link {
+    color: #000; /* Black text for visibility */
+    background-color: #fff; /* White background */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem; /* Smaller, elegant font */
+    font-family: var(--primary-font);
+    transition: all 0.3s ease;
+    margin: 0 5px; /* Spacing between buttons */
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #000; /* Black background for active page */
+    color: #fff; /* White text */
+    border-color: #000; /* Black border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Slight shadow for elevation */
+}
+
+.pagination .page-link:hover {
+    background-color: #f8f8f8; /* Light gray on hover */
+    color: #000;
+    border-color: #666; /* Darker gray border */
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #666; /* Gray for disabled state */
+    background-color: #f8f8f8; /* Light gray background */
+    border-color: #e0e0e0; /* Light gray border */
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .row-cols-lg-4 {
+        row-cols-md-2;
+    }
+
+    .filter-panel {
+        position: static;
+        left: 0;
+        width: 100%;
+        top: auto;
+        margin-bottom: 1.5rem;
+        box-shadow: none; /* Remove shadow on mobile */
+    }
+
+    .filter-panel.open {
+        left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-card img {
+        height: 180px; /* Smaller images on mobile */
+    }
+
+    .product-card h5 {
+        font-size: 0.8rem;
+    }
+
+    .product-card .text-gray {
+        font-size: 0.7rem;
+    }
+
+    .product-card .text-dark {
+        font-size: 0.8rem;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    .row-cols-md-2 {
+        row-cols-1;
+    }
+
+    .filter-toggle {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .filter-options .form-control,
+    .filter-options .form-select,
+    .filter-options .btn-black {
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+
+    .btn-wishlist {
+        font-size: 0.9rem;
+    }
+
+    .pagination .page-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Error State */
+.text-black {
+    color: #000 !important;
+}

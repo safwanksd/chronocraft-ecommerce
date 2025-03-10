@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ChronoCraft</title>
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Left Side: Full-Size Image -->
+        <div class="login-image">
+            <img src="/images/login-page-watch-image-.jpg" alt="Model Wearing Watch" class="image">
+        </div>
+
+        <!-- Right Side: Login Form Card -->
+        <div class="login-form">
+            <div class="login-card">
+                <div class="logo-space">
+                    <img src="/images/Chronocraft Logo 2 transp copy.png" alt="CHRONOCRAFT Logo" class="logo">
+                </div>
+                <h1 class="welcome-text">Login</h1>
+                <% if (message) { %>
+                    <div class="alert-message"><%= message %></div>
+                <% } %>
+                <form id="loginForm" action="/user/login" method="POST" class="login-form-content">
+                    <div class="form-group">
+                        <input type="email" name="email" id="email" placeholder="Email" required>
+                        <div id="error1" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" id="password" placeholder="Password" required>
+                        <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
+                        <div id="error2" class="error-message"></div>
+                    </div>
+                    <div class="forgot-password">
+                        <a href="/user/forgot-password" class="text-link">Forgot Password?</a>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="submit-btn">Login</button>
+                        <a href="/user/auth/google" class="google-btn">
+                            <i class="fab fa-google"></i> Log in with Google
+                        </a>
+                    </div>
+                    <div class="form-footer">
+                        <p>Don't have an account? <a href="/user/signup" class="text-link">Sign Up</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginForm = document.getElementById("loginForm");
+            const emailid = document.getElementById("email");
+            const passid = document.getElementById("password");
+
+            const error1 = document.getElementById("error1");
+            const error2 = document.getElementById("error2");
+
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
+
+            // Toastify Configuration
+            function showToast(message, type = 'error') {
+                const backgroundColor = type === 'success' ? '#d4a017' : '#ff4d4d';
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: backgroundColor,
+                        color: type === 'success' ? '#000' : '#f5f5f5',
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontSize: '0.9rem',
+                        fontWeight: '400',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                    }
+                }).showToast();
+            }
+
+            // Show server-side message as toast if present
+            <% if (message) { %>
+                showToast("<%= message %>");
+            <% } %>
+
+            // Validation Function
+            function validateField(input, pattern, errorElement, errorMessage) {
+                if (!pattern.test(input.value.trim())) {
+                    errorElement.style.display = "block";
+                    errorElement.innerHTML = errorMessage;
+                    return false;
+                } else {
+                    errorElement.style.display = "none";
+                    errorElement.innerHTML = "";
+                    return true;
+                }
+            }
+
+            // Real-time validation
+            emailid.addEventListener("input", () => validateField(emailid, emailPattern, error1, "Invalid email format."));
+            passid.addEventListener("input", () => validateField(passid, passwordPattern, error2, "Password must have min 6 characters, including a number."));
+
+            // Password Toggle
+            const passwordToggle = document.getElementById('passwordToggle');
+            if (passwordToggle) {
+                passwordToggle.addEventListener('click', function() {
+                    const passwordInput = document.getElementById('password');
+                    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Form Submission Validation
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const isEmailValid = validateField(emailid, emailPattern, error1, "Invalid email format.");
+                    const isPasswordValid = validateField(passid, passwordPattern, error2, "Password must have min 6 characters, including a number.");
+
+                    if (!(isEmailValid && isPasswordValid)) {
+                        showToast("Please correct the errors before submitting.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/user/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: emailid.value.trim(),
+                                password: passid.value
+                            }),
+                        });
+
+                        const data = await response.json();
+                        console.log('Server response:', data);
+
+                        if (data.success) {
+                            showToast('Login successful! Redirecting...', 'success');
+                            setTimeout(() => {
+                                window.location.href = data.redirectUrl || '/user/home';
+                            }, 2000); // Redirect after 2 seconds
+                        } else {
+                            // Specific error handling based on server response
+                            if (data.message === "User not found") {
+                                showToast("User with this email doesn't exist");
+                            } else if (data.message === "Incorrect password") {
+                                showToast("Incorrect password");
+                            } else if (data.message === "Your account is blocked") {
+                                showToast("Your account is blocked. Contact support!");
+                            } else {
+                                showToast(data.message || 'Login failed');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error during login:', error);
+                        showToast('An error occurred. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

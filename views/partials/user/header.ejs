@@ -1,27 +1,142 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luxury Watches</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-sections">
-            <a href="#" class="nav-link">MEN'S WATCHES</a>
-            <a href="#" class="nav-link">WOMEN'S WATCHES</a>
-            <a href="#" class="nav-link">WATCH STRAPS</a>
-        </div>
-        <div class="logo">
-            <h1>CHRONO CRAFT</h1>
-        </div>
-        <div class="nav-icons">
-            <a href="#"><i class="fas fa-user"></i></a>
-            <a href="#"><i class="fas fa-search"></i></a>
-            <a href="#"><i class="fas fa-shopping-bag"></i></a>
-        </div>
-    </nav>
+<!-- ✅ Header -->
 
+<link rel="stylesheet" href="/css/header-footer.css">
+
+<!-- ✅ Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+        <!-- 🔹 Left Menu -->
+        <div class="navbar-nav">
+            <a class="nav-link" href="/user/men">MEN</a>
+            <a class="nav-link" href="/user/women">WOMEN</a>
+            <a class="nav-link" href="/user/shop">SHOP</a>
+        </div>
+
+        <!-- 🔹 Center Logo -->
+        <a class="navbar-brand mx-auto" href="/">
+            <img src="/images/Chronocraft-logo-transp-copy.png" alt="CHRONOCRAFT" height="33">
+        </a>
+
+        <!-- 🔹 Right Menu -->
+        <div class="navbar-nav">
+            <!-- 🔹 Profile Hover Dropdown -->
+            <div class="nav-item dropdown profile-dropdown">
+                <a class="nav-link d-flex align-items-center" href="#" id="profileDropdown">
+                    <% if (user) { %>
+                        <span class="user-name me-2"><%= user.name %></span>
+                    <% } %>
+                    <i class="fas fa-user profile-icon"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" id="profileMenu">
+                    <% if (user) { %>
+                        <!-- 🔹 Logged-in User -->
+                        <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item logout-btn" href="/user/logout">Logout</a></li>
+                    <% } else { %>
+                        <!-- 🔹 Guest User -->
+                        <li><a class="dropdown-item" href="/user/login">Login</a></li>
+                        <li><a class="dropdown-item" href="/user/signup">Sign Up</a></li>
+                    <% } %>
+                </ul>
+            </div>
+            <a class="nav-link" href="/wishlist"><i class="fas fa-heart"></i></a>
+            <a class="nav-link" href="/user/cart"><i class="fas fa-shopping-bag"></i></a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("✅ Header Loaded");
+    
+        // Navbar Scroll Effect
+        function handleNavbarScroll() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+        }
+        window.addEventListener('scroll', handleNavbarScroll);
+    
+        // Profile Dropdown Behavior (Improved for stability)
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        const dropdownMenu = profileDropdown?.querySelector('.dropdown-menu');
+    
+        if (profileDropdown && dropdownMenu) {
+            let isOpen = false;
+            let timeoutId;
+    
+            const showDropdown = () => {
+                clearTimeout(timeoutId);
+                dropdownMenu.style.display = 'block';
+                dropdownMenu.style.opacity = '1';
+                dropdownMenu.style.visibility = 'visible';
+                isOpen = true;
+            };
+    
+            const hideDropdown = () => {
+                timeoutId = setTimeout(() => {
+                    dropdownMenu.style.opacity = '0';
+                    dropdownMenu.style.visibility = 'hidden';
+                    setTimeout(() => {
+                        if (!isOpen) dropdownMenu.style.display = 'none';
+                    }, 300); // Match CSS transition duration
+                }, 200);
+            };
+    
+            profileDropdown.addEventListener('mouseenter', showDropdown);
+            profileDropdown.addEventListener('mouseleave', () => {
+                isOpen = false;
+                hideDropdown();
+            });
+            dropdownMenu.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                isOpen = true;
+            });
+            dropdownMenu.addEventListener('mouseleave', () => {
+                isOpen = false;
+                hideDropdown();
+            });
+    
+            // Close dropdown on click outside (optional, can be removed if not needed)
+            document.addEventListener('click', (e) => {
+                if (!profileDropdown.contains(e.target) && isOpen) {
+                    dropdownMenu.style.opacity = '0';
+                    dropdownMenu.style.visibility = 'hidden';
+                    setTimeout(() => {
+                        dropdownMenu.style.display = 'none';
+                    }, 300);
+                    isOpen = false;
+                }
+            });
+        }
+    
+        // Redirect Non-Logged Users to Login on Protected Links
+        const authLinks = document.querySelectorAll('a[href="/wishlist"], a[href="/cart"]');
+        authLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                <% if (!user) { %>
+                    e.preventDefault();
+                    window.location.href = '/user/login';
+                <% } %>
+            });
+        });
+    
+        // Logout Button Handler
+        document.querySelector(".logout-btn").addEventListener("click", function (event) {
+            event.preventDefault();
+    
+            fetch("/user/logout")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirectUrl;
+                    }
+                })
+                .catch(error => console.error("Logout failed:", error));
+        });
+    });
+    </script>

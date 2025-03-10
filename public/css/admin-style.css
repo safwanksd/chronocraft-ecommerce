@@ -1,0 +1,153 @@
+/* admin dashboard styles */
+:root {
+    --header-height: 3rem;
+    --nav-width: 250px;
+    --first-color: #5f5e63;
+    --white-color: #F7F6FB;
+    --body-font: 'Nunito', sans-serif;
+    --normal-font-size: 1rem;
+}
+
+body {
+    margin: var(--header-height) 0 0 0;
+    padding: 0;
+    font-family: var(--body-font);
+    font-size: var(--normal-font-size);
+    background-color: #f5f5f5;
+    display: flex;
+}
+
+.header {
+    width: 100%;
+    height: var(--header-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header .logo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4723D9;
+}
+
+.profile-icon img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+display: none;
+position: absolute;
+right: 0;
+top: 45px;
+background: white;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+border-radius: 5px;
+min-width: 150px;
+z-index: 1000;
+}
+
+.dropdown-item {
+padding: 10px;
+display: block;
+color: black;
+text-decoration: none;
+}
+
+.dropdown-item:hover {
+background-color: #f8f9fa;
+}
+
+.position-relative {
+position: relative;
+}
+
+.sidebar {
+    width: var(--nav-width);
+    height: 100vh;
+    background-color: var(--first-color);
+    padding-top: 1rem;
+    position: fixed;
+    left: 0;
+    top: var(--header-height);
+    display: flex;
+    flex-direction: column;
+    color: var(--white-color);
+}
+
+.sidebar a {
+    color: var(--white-color);
+    text-decoration: none;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+}
+
+.sidebar a:hover, .sidebar .active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Add this to your admin-style.css */
+.sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-left: 4px solid #fff;
+}
+
+.sidebar i {
+    font-size: 1.5rem;
+}
+
+.content {
+    margin-left: var(--nav-width);
+    padding: 2rem;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.preview-thumbnail {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.img-container {
+    max-height: 500px;
+    width: 100%;
+    overflow: hidden;
+}
+
+#cropperImage {
+    max-width: 100%;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--first-color);
+    border-color: var(--first-color);
+    color: var(--white-color);
+}
+
+.pagination .page-link {
+    color: var(--first-color);
+}
+
+.pagination .page-link:hover {
+    color: var(--first-color);
+    background-color: #e9ecef;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+}

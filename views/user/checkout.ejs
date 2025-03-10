@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Checkout | ChronoCraft</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/checkout.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <%- include('../partials/user/header.ejs') %>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Checkout</h2>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5>Order Items</h5>
+                        <% cart.items.forEach(item => { %>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="<%= item.product.variants[item.variantIndex].productImages[0] %>" 
+                                     alt="<%= item.product.productName %>" 
+                                     class="checkout-product-image me-3">
+                                <div class="flex-grow-1">
+                                    <h6><%= item.product.productName %></h6>
+                                    <p class="text-muted">
+                                        Color: <%= item.product.variants[item.variantIndex].colorName %> | 
+                                        Qty: <%= item.quantity %>
+                                    </p>
+                                    <p class="fw-bold">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></p>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5>Delivery Address</h5>
+                        <div class="address-list" id="addressList">
+                            <% addresses.forEach(address => { %>
+                                <div class="address-card <%= address.isDefault ? 'selected' : '' %>" 
+                                     data-address-id="<%= address._id %>"
+                                     onclick="selectAddress('<%= address._id %>')">
+                                    <p><%= address.street %>, <%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+                                    <% if (address.isDefault) { %>
+                                        <small>(Default)</small>
+                                    <% } %>
+                                    <a href="/user/profile/addresses/edit/<%= address._id %>" class="edit-link">Edit</a>
+                                </div>
+                            <% }); %>
+                        </div>
+                        <button class="btn btn-primary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addAddressModal">+ Add New Address</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Payment Method</h5>
+                        <div class="payment-option">
+                            <input type="radio" id="cod" name="payment" value="cod" checked>
+                            <label for="cod" class="ms-2">Cash on Delivery</label>
+                            <p class="text-muted small">Pay when you receive.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Order Summary</h4>
+                        <p>Subtotal: ₹<%= subtotal.toLocaleString('en-IN') %></p>
+                        <p>GST (12%): ₹<%= gstAmount.toLocaleString('en-IN') %></p>
+                        <p>Shipping Fee: ₹<%= shippingFee.toLocaleString('en-IN') %></p>
+                        <p id="totalAmount">Total Amount: ₹<%= totalAmount.toLocaleString('en-IN') %></p>
+                        <form id="placeOrderForm" method="POST" action="/user/checkout/place-order">
+                            <input type="hidden" name="addressId" id="selectedAddressId">
+                            <button type="submit" class="btn btn-orange w-100 mt-3">Place Order</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Address Modal -->
+    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAddressForm" method="POST">
+                        <div class="form-group mb-3">
+                            <label for="modalStreet" class="form-label">Street:</label>
+                            <input type="text" name="street" id="modalStreet" class="form-control" required>
+                            <div id="errorStreet" class="error-message mt-1" style="color: red; display: none;"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="modalCity" class="form-label">City:</label>
+                            <input type="text" name="city" id="modalCity" class="form-control" required>
+                            <div id="errorCity" class="error-message mt-1" style="color: red; display: none;"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="modalState" class="form-label">State:</label>
+                            <input type="text" name="state" id="modalState" class="form-control" required>
+                            <div id="errorState" class="error-message mt-1" style="color: red; display: none;"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="modalPincode" class="form-label">Pincode:</label>
+                            <input type="text" name="pincode" id="modalPincode" class="form-control" required>
+                            <div id="errorPincode" class="error-message mt-1" style="color: red; display: none;"></div>
+                        </div>
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="modalIsDefault" name="isDefault">
+                            <label class="form-check-label" for="modalIsDefault">Set as Default</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewAddress()">Save Address</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer.ejs') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function selectAddress(addressId) {
+            const addressCards = document.querySelectorAll('.address-card');
+            addressCards.forEach(card => card.classList.remove('selected'));
+            const selectedCard = document.querySelector(`.address-card[data-address-id="${addressId}"]`);
+            selectedCard.classList.add('selected');
+            document.getElementById('selectedAddressId').value = addressId;
+        }
+
+        async function saveNewAddress() {
+            const street = document.getElementById('modalStreet').value.trim();
+            const city = document.getElementById('modalCity').value.trim();
+            const state = document.getElementById('modalState').value.trim();
+            const pincode = document.getElementById('modalPincode').value.trim();
+            const isDefault = document.getElementById('modalIsDefault').checked;
+
+            // Validation patterns
+            const streetPattern = /^.+$/;
+            const cityPattern = /^[a-zA-Z\s]{2,}$/;
+            const statePattern = /^[a-zA-Z\s]{2,}$/;
+            const pincodePattern = /^\d{6}$/;
+
+            // Error elements
+            const errorStreet = document.getElementById('errorStreet');
+            const errorCity = document.getElementById('errorCity');
+            const errorState = document.getElementById('errorState');
+            const errorPincode = document.getElementById('errorPincode');
+
+            // Validation function
+            function validateField(input, pattern, errorElement, errorMessage) {
+                if (!pattern.test(input)) {
+                    errorElement.style.display = 'block';
+                    errorElement.textContent = errorMessage;
+                    return false;
+                } else {
+                    errorElement.style.display = 'none';
+                    errorElement.textContent = '';
+                    return true;
+                }
+            }
+
+            // Validate all fields on submit
+            const isStreetValid = validateField(street, streetPattern, errorStreet, "Street cannot be empty");
+            const isCityValid = validateField(city, cityPattern, errorCity, "City must be at least 2 letters");
+            const isStateValid = validateField(state, statePattern, errorState, "State must be at least 2 letters");
+            const isPincodeValid = validateField(pincode, pincodePattern, errorPincode, "Pincode must be 6 digits");
+
+            if (!(isStreetValid && isCityValid && isStateValid && isPincodeValid)) {
+                return; // Prevent submission if validation fails
+            }
+
+            try {
+                const response = await fetch('/user/profile/addresses/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ street, city, state, pincode, isDefault })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Address added successfully!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    setTimeout(() => {
+                        location.reload(); // Reload to show the new address in the list
+                    }, 2000);
+                    selectAddress(data.newAddressId); // Update selected address after adding
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: data.message || 'Failed to add address',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Server error. Please try again.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        }
+
+        // Real-time validation on input
+        ['modalStreet', 'modalCity', 'modalState', 'modalPincode'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                const field = this;
+                const value = field.value.trim();
+                const errorElement = document.getElementById(`error${field.id.charAt(5).toUpperCase() + field.id.slice(6)}`);
+                const patterns = {
+                    modalStreet: /^.+$/,
+                    modalCity: /^[a-zA-Z\s]{2,}$/,
+                    modalState: /^[a-zA-Z\s]{2,}$/,
+                    modalPincode: /^\d{6}$/
+                };
+                const errorMessages = {
+                    modalStreet: "Street cannot be empty",
+                    modalCity: "City must be at least 2 letters",
+                    modalState: "State must be at least 2 letters",
+                    modalPincode: "Pincode must be 6 digits"
+                };
+
+                validateField(value, patterns[field.id], errorElement, errorMessages[field.id]);
+            });
+        });
+
+        document.getElementById('placeOrderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const addressId = document.getElementById('selectedAddressId').value;
+            if (!addressId) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Please select a delivery address.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                return;
+            }
+
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+            try {
+                const response = await fetch('/user/checkout/place-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ addressId, paymentMethod })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = `/user/order-success/${data.orderId}`;
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: data.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Server error. Please try again.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+
+        // Initialize with the default address selected (if any)
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultAddress = document.querySelector('.address-card.selected');
+            if (defaultAddress) {
+                defaultAddress.classList.add('selected');
+                document.getElementById('selectedAddressId').value = defaultAddress.getAttribute('data-address-id');
+            }
+        });
+    </script>
+</body>
+</html>

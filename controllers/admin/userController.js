@@ -1,11 +1,12 @@
-// admin/userController.js
+// controllers/admin/userController.js
 
 const User = require("../../models/userSchema");
 
+// Retrieves a paginated list of users with search and sort options
 const getUsers = async (req, res) => {
     try {
         let { search, page, sort } = req.query;
-        const limit = 10; 
+        const limit = 10;
         const currentPage = parseInt(page) || 1;
         const skip = (currentPage - 1) * limit;
 
@@ -29,67 +30,72 @@ const getUsers = async (req, res) => {
 
         res.render("admin/users", { users, search, currentPage, totalPages, sort });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error("Error fetching users:", error);
         res.redirect("/admin/dashboard");
     }
 };
 
+// Blocks a user by setting their isBlocked status to true
 const blockUser = async (req, res) => {
     try {
         const userId = req.params.id;
-        console.log(`Blocking user: ${userId}`);
 
         const user = await User.findById(userId);
         if (!user) {
-            console.error("User not found!");
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
         user.isBlocked = true;
         await user.save();
 
-        console.log(`User ${userId} blocked successfully!`);
         return res.json({ success: true, message: "User blocked successfully" });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error("Error blocking user:", error);
         return res.status(500).json({ success: false, message: "Failed to update user status" });
     }
 };
 
+// Unblocks a user by setting their isBlocked status to false
 const unblockUser = async (req, res) => {
     try {
         const userId = req.params.id;
-        console.log(`Unblocking user: ${userId}`);
 
         const user = await User.findById(userId);
         if (!user) {
-            console.error("User not found!");
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
         user.isBlocked = false;
         await user.save();
 
-        console.log(`User ${userId} unblocked successfully!`);
         return res.json({ success: true, message: "User unblocked successfully" });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error("Error unblocking user:", error);
         return res.status(500).json({ success: false, message: "Failed to update user status" });
     }
 };
 
+// Renders the page to add a new product (note: this seems misplaced, likely intended for productController)
 const getAddProductPage = async (req, res) => {
     try {
-        // Fetch categories & brands from DB
+        // Fetch categories and brands from the database
         const categories = await Category.find({});
         const brands = await Brand.find({});
 
         res.render("admin/add-product", { categories, brands });
     } catch (error) {
-        console.log("Error loading add product page:", error);
+        // Logs the error for debugging purposes
+        console.error("Error loading add product page:", error);
         res.status(500).send("Server Error");
     }
 };
 
-
-module.exports = { getUsers, blockUser, unblockUser, getAddProductPage };
+module.exports = {
+    getUsers,
+    blockUser,
+    unblockUser,
+    getAddProductPage
+};

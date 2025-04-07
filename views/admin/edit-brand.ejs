@@ -1,70 +1,76 @@
+<!-- admin/edit-brand.ejs -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Edit Brand</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/admin-style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <%- include('../partials/admin/header.ejs') %>
-    <%- include('../partials/admin/sidebar.ejs') %>
+        <%- include('../partials/admin/sidebar.ejs') %>
 
-    <div class="content">
-        <h2 class="mb-4 text-center">Edit Brand</h2>
+            <div class="content">
+                <h2 class="mb-4 text-center">Edit Brand</h2>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <form id="editBrandForm">
-                    <input type="hidden" id="brandId" value="<%= brand._id %>">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Brand Name</label>
-                        <input type="text" id="brandName" class="form-control" value="<%= brand.brandName %>" required>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form id="editBrandForm">
+                            <input type="hidden" id="brandId" value="<%= brand._id %>">
+
+                            <div class="mb-3">
+                                <label class="form-label">Brand Name</label>
+                                <input type="text" id="brandName" class="form-control" value="<%= brand.brandName %>"
+                                    required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="/admin/brands" class="btn btn-secondary">Cancel</a>
+                        </form>
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="/admin/brands" class="btn btn-secondary">Cancel</a>
-                </form>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        document.getElementById("editBrandForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            const id = document.getElementById("brandId").value;
-            const name = document.getElementById("brandName").value.trim();
+            <script>
+                document.getElementById("editBrandForm").addEventListener("submit", async function (e) {
+                    e.preventDefault();
+                    const id = document.getElementById("brandId").value;
+                    const name = document.getElementById("brandName").value.trim();
 
-            if (!name) {
-                Swal.fire("Warning!", "Brand name cannot be empty!", "warning");
-                return;
-            }
+                    if (!name) {
+                        Swal.fire("Warning!", "Brand name cannot be empty!", "warning");
+                        return;
+                    }
 
-            try {
-                const response = await fetch("/admin/brands/edit", {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        id: id,
-                        brandName: name
-                    })
+                    try {
+                        const response = await fetch("/admin/brands/edit", {
+                            method: "POST",
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: id,
+                                brandName: name
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            Swal.fire("Updated!", result.success, "success").then(() => {
+                                window.location.href = "/admin/brands";
+                            });
+                        } else {
+                            Swal.fire("Error!", result.error, "error");
+                        }
+                    } catch (error) {
+                        Swal.fire("Oops!", "Something went wrong. Try again!", "error");
+                    }
                 });
-                
-                const result = await response.json();
-                if (result.success) {
-                    Swal.fire("Updated!", result.success, "success").then(() => {
-                        window.location.href = "/admin/brands";
-                    });
-                } else {
-                    Swal.fire("Error!", result.error, "error");
-                }
-            } catch (error) {
-                Swal.fire("Oops!", "Something went wrong. Try again!", "error");
-            }
-        });
-    </script>
+            </script>
 </body>
+
 </html>

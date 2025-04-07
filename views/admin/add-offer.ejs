@@ -1,0 +1,199 @@
+<!-- views/admin/add-offer.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Offer</title>
+  <%- include('../partials/admin/header') %>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f7fa;
+      }
+
+      .container {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 200px;
+        margin-top: 80px;
+        padding: 2rem;
+        width: calc(100% - 200px);
+      }
+
+      h1 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 1rem;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+        color: #555;
+        margin: 1.5rem 0 1rem;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.5rem;
+      }
+
+      .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-decoration: none;
+        float: right;
+      }
+
+      .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 0.75rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+      }
+
+      form {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+        font-weight: 500;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+      }
+
+      input[type="number"] {
+        width: 100px;
+        display: inline-block;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .form-actions button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+      }
+
+      .btn-primary {
+        background-color: #6f42c1;
+        color: #fff;
+      }
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <%- include('../partials/admin/sidebar') %>
+      <div class="main-content">
+        <h1>Add New Offer</h1>
+        <a href="/admin/offers" class="btn btn-secondary">Back to Offers</a>
+        <% if (error) { %>
+          <div class="error-message">
+            <%= error %>
+          </div>
+          <% } %>
+            <form action="/admin/offers/add" method="POST">
+              <h2>Basic Information</h2>
+              <div class="form-group">
+                <label for="name">Offer Name</label>
+                <input type="text" id="name" name="name" required>
+              </div>
+              <div class="form-group">
+                <label for="type">Offer Type</label>
+                <select id="type" name="type" onchange="toggleTarget()" required>
+                  <option value="">Select offer type</option>
+                  <option value="category">Category Offer</option>
+                  <option value="product">Product Offer</option>
+                </select>
+              </div>
+              <div class="form-group" id="categorySelect" style="display: none;">
+                <label for="targetId">Select Category</label>
+                <select id="targetIdCategory" name="targetId">
+                  <option value="">Select category</option>
+                  <% categories.forEach(category=> { %>
+                    <option value="<%= category._id %>">
+                      <%= category.name %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+              <div class="form-group" id="productSelect" style="display: none;">
+                <label for="targetId">Select Product</label>
+                <select id="targetIdProduct" name="targetId">
+                  <option value="">Select product</option>
+                  <% products.forEach(product=> { %>
+                    <option value="<%= product._id %>">
+                      <%= product.productName %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+
+              <h2>Discount Details</h2>
+              <div class="form-group">
+                <label for="discount">Discount Percentage</label>
+                <input type="number" id="discount" name="discount" min="0" max="100" required> %
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" name="startDate" required>
+              </div>
+              <div class="form-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" name="endDate" required>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary"
+                  onclick="window.location.href='/admin/offers'">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Offer</button>
+              </div>
+            </form>
+      </div>
+  </div>
+
+  <script>
+    function toggleTarget() {
+      const type = document.getElementById('type').value;
+      document.getElementById('categorySelect').style.display = type === 'category' ? 'block' : 'none';
+      document.getElementById('productSelect').style.display = type === 'product' ? 'block' : 'none';
+      document.getElementById('targetIdCategory').name = type === 'category' ? 'targetId' : '';
+      document.getElementById('targetIdProduct').name = type === 'product' ? 'targetId' : '';
+    }
+  </script>
+</body>
+
+</html>

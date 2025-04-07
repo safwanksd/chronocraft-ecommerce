@@ -1,6 +1,9 @@
 // middlewares/authMiddleware.js
+// Middleware functions for user authentication and authorization
+
 const User = require('../models/userSchema');
 
+// Redirects logged-in users to the homepage, allows unauthenticated users to proceed
 const isLoggedIn = (req, res, next) => {
     if (req.session.user) {
         return res.redirect("/user/home");
@@ -8,11 +11,13 @@ const isLoggedIn = (req, res, next) => {
     next();
 };
 
+// Sets the user in res.locals for use in views
 const checkAuth = (req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 };
 
+// Ensures the user is authenticated; otherwise, redirects to login
 const requireAuth = (req, res, next) => {
     if (!req.session.user) {
         if (req.xhr || (req.headers['x-requested-with'] && req.headers['x-requested-with'].toLowerCase() === 'xmlhttprequest')) {
@@ -23,6 +28,7 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
+// Checks if the user is blocked; logs out and redirects if blocked
 const checkBlockedStatus = async (req, res, next) => {
     if (!req.session.user) {
         if (req.xhr || (req.headers['x-requested-with'] && req.headers['x-requested-with'].toLowerCase() === 'xmlhttprequest')) {

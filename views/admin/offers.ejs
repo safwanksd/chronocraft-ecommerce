@@ -1,0 +1,304 @@
+<!-- views/admin/offers.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offer Management</title>
+  <%- include('../partials/admin/header') %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f7fa;
+      }
+
+      .container {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 200px;
+        margin-top: 80px;
+        padding: 2rem;
+        width: calc(100% - 200px);
+      }
+
+      h1 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 1.5rem;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .tab {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .tab.active {
+        background-color: #6f42c1;
+        color: #fff;
+        border-color: #6f42c1;
+      }
+
+      .btn-primary {
+        background-color: #6f42c1;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-decoration: none;
+        float: right;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background-color: #f8f9fa;
+        color: #555;
+        font-weight: 600;
+      }
+
+      td small {
+        color: #888;
+      }
+
+      .status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+      }
+
+      .status.active {
+        background-color: #28a745;
+        color: #fff;
+      }
+
+      .status.inactive {
+        background-color: #dc3545;
+        color: #fff;
+      }
+
+      .btn-edit {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 20px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked+.slider {
+        background-color: #28a745;
+      }
+
+      input:checked+.slider:before {
+        transform: translateX(20px);
+      }
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <%- include('../partials/admin/sidebar') %>
+      <div class="main-content">
+        <h1>Offer Management</h1>
+        <div class="tabs">
+          <a href="/admin/offers?type=category" class="tab <%= activeTab === 'category' ? 'active' : '' %>">Category
+            Offers</a>
+          <a href="/admin/offers?type=product" class="tab <%= activeTab === 'product' ? 'active' : '' %>">Product
+            Offers</a>
+        </div>
+        <a href="/admin/offers/add" class="btn btn-primary">Add New Offer</a>
+        <table>
+          <thead>
+            <tr>
+              <th>Offer Name</th>
+              <th>
+                <%= activeTab==='category' ? 'Category' : 'Product' %>
+              </th>
+              <th>Discount</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% offers.forEach(offer=> { %>
+              <tr>
+                <td>
+                  <%= offer.name %><br>
+                    <small>ID: <%= offer._id %></small>
+                </td>
+                <td>
+                  <%= offer.targetId?.name || offer.targetId?.productName || 'N/A' %>
+                </td>
+                <td>
+                  <%= offer.discount %>% OFF
+                </td>
+                <td>
+                  <%= offer.startDate.toISOString().split('T')[0] %>
+                </td>
+                <td>
+                  <%= offer.endDate.toISOString().split('T')[0] %>
+                </td>
+                <td>
+                  <span class="status <%= offer.isActive ? 'active' : 'inactive' %>" id="status-<%= offer._id %>">
+                    <%= offer.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <a href="/admin/offers/edit/<%= offer._id %>" class="btn btn-edit">✏️</a>
+                  <label class="toggle-switch">
+                    <input type="checkbox" <%=offer.isActive ? 'checked' : '' %> onchange="toggleOfferStatus('<%=
+                      offer._id %>', this.checked, '<%= activeTab %>', this)">
+                        <span class="slider"></span>
+                  </label>
+                </td>
+              </tr>
+              <% }) %>
+          </tbody>
+        </table>
+      </div>
+  </div>
+
+  <script>
+    async function toggleOfferStatus(offerId, newIsActive, activeTab, checkbox) {
+      console.log(`Toggling offer ${offerId}, current state: ${checkbox.checked}, new state: ${newIsActive}`);
+
+      // Determine the current state (before toggle)
+      const currentIsActive = checkbox.checked;
+      const action = currentIsActive ? 'deactivate' : 'activate';
+      const message = `Are you sure you want to ${action} this offer?`;
+
+      const result = await Swal.fire({
+        title: message,
+        text: `This will ${action} the offer for the selected ${activeTab}.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#6f42c1',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Yes, ${action} it!`,
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/admin/offers/toggle-status/${offerId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          const result = await response.json();
+          console.log('Toggle response:', result);
+
+          if (result.success) {
+            // Use the explicit isActive value from the server
+            const newStatus = result.isActive;
+            showToast(`Offer ${newStatus ? 'activated' : 'deactivated'} successfully`, 'success');
+
+            // Update status dynamically
+            const statusElement = document.getElementById(`status-${offerId}`);
+            if (statusElement) {
+              statusElement.className = `status ${newStatus ? 'active' : 'inactive'}`;
+              statusElement.textContent = newStatus ? 'Active' : 'Inactive';
+            } else {
+              console.error(`Status element for offer ${offerId} not found`);
+            }
+
+            // Sync the checkbox state with the new status
+            checkbox.checked = newStatus;
+          } else {
+            showToast(result.message || 'Failed to toggle offer status', 'danger');
+            // Revert the toggle if the server request failed
+            checkbox.checked = currentIsActive;
+          }
+        } catch (error) {
+          console.error('Error toggling offer:', error);
+          showToast('Server error while toggling offer status', 'danger');
+          // Revert the toggle on error
+          checkbox.checked = currentIsActive;
+        }
+      } else {
+        // Revert the toggle if canceled
+        checkbox.checked = currentIsActive;
+      }
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: type,
+        title: message,
+        showConfirmButton: false,
+        timer: 3000
+      });
+    }
+  </script>
+</body>
+
+</html>

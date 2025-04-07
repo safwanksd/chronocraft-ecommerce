@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+// models/orderSchema.js
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const orderSchema = new Schema({
@@ -60,14 +61,26 @@ const orderSchema = new Schema({
     payment: {  
         method: {
             type: String,
-            enum: ['cod'], //
+            enum: ['COD', 'RAZORPAY', 'WALLET'], 
             required: true
         },
         status: {
             type: String,
-            enum: ['Pending', 'Completed', 'Failed', 'Order Cancelled'],
+            enum: ['Pending', 'Completed', 'Failed', 'Order Cancelled', 'Refunded'],
             default: 'Pending'
+        },
+        razorpayPaymentId: {
+            type: String,
+            required: function() { return this.method === 'razorpay' && this.status === 'Completed'; }
+        },
+        razorpayOrderId: {
+            type: String,
+            required: function() { return this.method === 'razorpay'; }
         }
+    },
+    coupon: {
+        code: { type: String, default: null },
+        discountAmount: { type: Number, default: 0 }
     },
     pricing: {
         subtotal: {
@@ -86,7 +99,7 @@ const orderSchema = new Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Failed', 'Return Requested', 'Returned'], // Added 'Return Requested'
+        enum: ['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Failed', 'Return Requested', 'Returned'],
         default: 'Processing'
     },
     cancelReason: {
@@ -134,5 +147,5 @@ orderSchema.pre('save', async function(next) {
     next();
 });
 
-const Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;

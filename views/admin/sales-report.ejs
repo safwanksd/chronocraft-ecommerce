@@ -1,0 +1,310 @@
+<!-- admin/sales-report.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Sales Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <style>
+        .pagination .page-link {
+            color: #4723D9;
+            border-radius: 5px;
+            margin: 0 2px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #4723D9;
+            border-color: #4723D9;
+            color: white;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            color: #4723D9;
+        }
+
+        .card i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .btn-light {
+            color: #333;
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .btn-light.active {
+            background-color: #4723D9 !important;
+            color: #fff !important;
+            border-color: #4723D9 !important;
+        }
+
+        .custom-date-form {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-date-form .form-control {
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            padding: 5px 10px;
+            font-size: 14px;
+            width: 150px;
+        }
+
+        .custom-date-form .btn-primary {
+            padding: 5px 15px;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/admin/header.ejs') %>
+        <%- include('../partials/admin/sidebar.ejs') %>
+
+            <div class="content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Sales Report</h2>
+                    <div>
+                        <a href="/admin/sales-report/download/pdf?timeframe=<%= timeframe %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
+                            class="btn btn-danger me-2" id="downloadPDF">Download PDF</a>
+                        <a href="/admin/sales-report/download/excel?timeframe=<%= timeframe %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
+                            class="btn btn-success" id="downloadExcel">Download Excel</a>
+                    </div>
+                </div>
+
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card text-center p-3">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h4>Total Revenue</h4>
+                                    <p>₹<%= overallTotalRevenue.toFixed(2) %>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center p-3">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <h4>Total Orders</h4>
+                                    <p>
+                                        <%= overallTotalOrders %>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center p-3">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <h4>Average Order Value</h4>
+                                    <p>₹<%= overallAverageOrderValue.toFixed(2) %>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center p-3">
+                                    <i class="fas fa-tags"></i>
+                                    <h4>Total Discount</h4>
+                                    <p>₹<%= overallDiscount.toFixed(2) %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <a href="/admin/sales-report?timeframe=today"
+                                class="btn btn-light <%= timeframe === 'today' ? 'active' : '' %>">Today</a>
+                            <a href="/admin/sales-report?timeframe=weekly"
+                                class="btn btn-light <%= timeframe === 'weekly' ? 'active' : '' %>">Weekly</a>
+                            <a href="/admin/sales-report?timeframe=monthly"
+                                class="btn btn-light <%= timeframe === 'monthly' ? 'active' : '' %>">Monthly</a>
+                            <a href="/admin/sales-report?timeframe=yearly"
+                                class="btn btn-light <%= timeframe === 'yearly' ? 'active' : '' %>">Yearly</a>
+                            <a href="/admin/sales-report?timeframe=custom"
+                                class="btn btn-light <%= timeframe === 'custom' ? 'active' : '' %>">Custom</a>
+                            <% if (timeframe==='custom' ) { %>
+                                <form action="/admin/sales-report" method="GET" class="custom-date-form">
+                                    <input type="hidden" name="timeframe" value="custom">
+                                    <div class="form-group">
+                                        <label for="startDate" class="form-label small">Start Date</label>
+                                        <input type="date" id="startDate" name="startDate" value="<%= startDate %>"
+                                            class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="endDate" class="form-label small">End Date</label>
+                                        <input type="date" id="endDate" name="endDate" value="<%= endDate %>"
+                                            class="form-control" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Apply</button>
+                                </form>
+                                <% } %>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Orders</th>
+                                        <th>Products Sold</th>
+                                        <th>Revenue</th>
+                                        <th>Average Order Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (reportData.length> 0) { %>
+                                        <% reportData.forEach(data=> { %>
+                                            <tr>
+                                                <td>
+                                                    <%= data.date %>
+                                                </td>
+                                                <td>
+                                                    <%= data.orders %>
+                                                </td>
+                                                <td>
+                                                    <%= data.productsSold %>
+                                                </td>
+                                                <td>₹<%= data.revenue.toFixed(2) %>
+                                                </td>
+                                                <td>₹<%= data.averageOrderValue.toFixed(2) %>
+                                                </td>
+                                                <td>
+                                                    <a href="/admin/sales-report/download/pdf?timeframe=custom&startDate=<%= data.date %>-01&endDate=<%= data.date %>-31"
+                                                        class="btn btn-sm btn-primary download-row-pdf">Download PDF</a>
+                                                    <a href="/admin/sales-report/download/excel?timeframe=custom&startDate=<%= data.date %>-01&endDate=<%= data.date %>-31"
+                                                        class="btn btn-sm btn-success download-row-excel">Download
+                                                        Excel</a>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                                <tr>
+                                                    <td><strong>Total</strong></td>
+                                                    <td><strong>
+                                                            <%= overallTotalOrders %>
+                                                        </strong></td>
+                                                    <td><strong>
+                                                            <%= overallProductsSold %>
+                                                        </strong></td>
+                                                    <td><strong>₹<%= overallTotalRevenue.toFixed(2) %></strong></td>
+                                                    <td><strong>₹<%= overallAverageOrderValue.toFixed(2) %></strong>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="6" class="text-center">No sales data available for
+                                                            the selected period.</td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
+
+                // Handle Overall PDF Download
+                document.getElementById('downloadPDF').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const url = e.target.href;
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Failed to generate PDF');
+                        const blob = await response.blob();
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `sales-report-${new Date().toISOString().split('T')[0]}.pdf`;
+                        link.click();
+                    } catch (error) {
+                        Toast.fire({ icon: 'error', title: error.message || 'Failed to download PDF report' });
+                    }
+                });
+
+                // Handle Overall Excel Download
+                document.getElementById('downloadExcel').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const url = e.target.href;
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Failed to generate Excel');
+                        const blob = await response.blob();
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `sales-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+                        link.click();
+                    } catch (error) {
+                        Toast.fire({ icon: 'error', title: error.message || 'Failed to download Excel report' });
+                    }
+                });
+
+                // Handle Row-Level PDF Download
+                document.querySelectorAll('.download-row-pdf').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const url = e.target.href;
+                        try {
+                            const response = await fetch(url);
+                            if (!response.ok) throw new Error('Failed to generate PDF');
+                            const blob = await response.blob();
+                            const link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = `sales-report-${url.split('startDate=')[1].split('&')[0]}.pdf`;
+                            link.click();
+                        } catch (error) {
+                            Toast.fire({ icon: 'error', title: error.message || 'Failed to download PDF report' });
+                        }
+                    });
+                });
+
+                // Handle Row-Level Excel Download
+                document.querySelectorAll('.download-row-excel').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const url = e.target.href;
+                        try {
+                            const response = await fetch(url);
+                            if (!response.ok) throw new Error('Failed to generate Excel');
+                            const blob = await response.blob();
+                            const link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = `sales-report-${url.split('startDate=')[1].split('&')[0]}.xlsx`;
+                            link.click();
+                        } catch (error) {
+                            Toast.fire({ icon: 'error', title: error.message || 'Failed to download Excel report' });
+                        }
+                    });
+                });
+            </script>
+</body>
+
+</html>

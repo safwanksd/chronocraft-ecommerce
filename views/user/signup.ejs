@@ -1,16 +1,22 @@
+<!-- views/user/signup.ejs -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChronoCraft - Sign Up</title>
     <link rel="stylesheet" href="/css/signup.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <!-- Toastify CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="/js/signup.js" defer></script>
 </head>
+
 <body>
     <div class="signup-container">
         <!-- Left Side: Full-Size Image -->
@@ -48,7 +54,8 @@
                     </div>
 
                     <div class="form-group">
-                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                        <input type="password" id="confirmPassword" name="confirmPassword"
+                            placeholder="Confirm Password" required>
                         <i class="fas fa-eye password-toggle" id="confirmPasswordToggle"></i>
                         <div id="error5" class="error-message"></div>
                     </div>
@@ -139,7 +146,7 @@
             const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
 
             if (passwordToggle) {
-                passwordToggle.addEventListener('click', function() {
+                passwordToggle.addEventListener('click', function () {
                     const passwordInput = document.getElementById('password');
                     passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
                     this.classList.toggle('fa-eye-slash');
@@ -147,7 +154,7 @@
             }
 
             if (confirmPasswordToggle) {
-                confirmPasswordToggle.addEventListener('click', function() {
+                confirmPasswordToggle.addEventListener('click', function () {
                     const confirmPasswordInput = document.getElementById('confirmPassword');
                     confirmPasswordInput.type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
                     this.classList.toggle('fa-eye-slash');
@@ -202,4 +209,5 @@
         });
     </script>
 </body>
+
 </html>

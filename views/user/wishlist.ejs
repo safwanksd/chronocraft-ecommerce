@@ -1,0 +1,375 @@
+<!-- views/user/wishlist.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>My Wishlist | CHRONOCRAFT The Watch Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/wishlist.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <%- include('../partials/user/header') %>
+
+        <div class="container mt-5 py-5">
+            <h2 class="text-center mb-5 text-black text-shadow">My Wishlist</h2>
+            <% if (wishlist.length> 0) { %>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="wishlistContainer">
+                    <% wishlist.forEach(item=> { %>
+                        <div class="col" data-wishlist-id="<%= item._id %>">
+                            <div class="card wishlist-card h-100">
+                                <div class="wishlist-actions">
+                                    <button class="btn btn-remove" onclick="removeFromWishlist('<%= item._id %>')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <img src="<%= item.variant.productImage[0] %>" class="card-img-top"
+                                    alt="<%= item.product.productName %>">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-black text-shadow">
+                                        <%= item.product.productName %>
+                                    </h5>
+                                    <p class="card-text text-gray mb-2">
+                                        <%= item.product.brand.brandName %> | <%= item.product.category.name %>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <strong class="text-dark">₹<%= item.variant.salePrice.toLocaleString('en-IN') %>
+                                                </strong>
+                                        <% if (item.variant.salePrice < item.variant.price) { %>
+                                            <span class="original-price text-muted ms-2"><s>₹<%=
+                                                        item.variant.price.toLocaleString('en-IN') %></s></span>
+                                            <% } %>
+                                    </p>
+                                    <div class="variant-selection mb-3">
+                                        <label class="form-label text-black mb-1">Choose Color:</label>
+                                        <select class="form-select variant-selector"
+                                            onchange="updateVariant(this, '<%= item._id %>')">
+                                            <% item.product.variants.forEach((variant, index)=> { %>
+                                                <option value="<%= index %>" data-color="<%= variant.color %>"
+                                                    data-color-name="<%= variant.colorName %>"
+                                                    data-stock="<%= variant.stock %>" data-price="<%= variant.price %>"
+                                                    data-sale-price="<%= variant.salePrice %>"
+                                                    data-image="<%= variant.productImages[0] %>"
+                                                    data-status="<%= variant.status %>"
+                                                    <%=variant.color===item.variant.color ? 'selected' : '' %>>
+                                                    <%= variant.colorName %>
+                                                </option>
+                                                <% }); %>
+                                        </select>
+                                    </div>
+                                    <p
+                                        class="stock-status mb-2 <%= item.variant.stock > 0 ? 'text-success' : 'text-danger' %>">
+                                        <%= item.variant.stock> 0 ? `In Stock (${item.variant.stock} left)` : 'Out of
+                                            Stock' %>
+                                    </p>
+                                    <button class="btn btn-dark btn-add-to-cart mt-auto"
+                                        onclick="addToCartFromWishlist('<%= item._id %>', '<%= item.product._id %>', this)"
+                                        <%=item.variant.stock <=0 ? 'disabled' : '' %>>
+                                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                </div>
+                <% } else { %>
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <p class="text-black text-shadow">Your wishlist is empty.</p>
+                            <a href="/user/shop" class="btn btn-black">Continue Shopping</a>
+                        </div>
+                    </div>
+                    <% } %>
+        </div>
+
+        <div class="pagination-container mt-4">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage> 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+                        </li>
+                        <% } %>
+
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
+
+                                    <% if (currentPage < totalPages) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                                        </li>
+                                        <% } %>
+                </ul>
+            </nav>
+        </div>
+
+
+        <%- include('../partials/user/footer.ejs') %>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    console.log("🟢 Wishlist Page Loaded! Items:", <%= wishlist.length %>);
+
+                    window.removeFromWishlist = async function (wishlistId) {
+                        try {
+                            const response = await fetch(`/user/wishlist/remove/${wishlistId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+
+                            const data = await response.json();
+                            if (data.success) {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: 'Removed from Wishlist',
+                                    text: data.message,
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+
+                                // Remove the item from the DOM
+                                document.querySelector(`[data-wishlist-id="${wishlistId}"]`).remove();
+                                if (document.querySelectorAll('#wishlistContainer .col').length === 0) {
+                                    document.getElementById('wishlistContainer').outerHTML = `
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <p class="text-black text-shadow">Your wishlist is empty.</p>
+                            <a href="/user/shop" class="btn btn-black">Continue Shopping</a>
+                        </div>
+                    </div>
+                `;
+                                }
+
+                                // Dispatch custom event to update header counts
+                                document.dispatchEvent(new Event('wishlistUpdated'));
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: data.message
+                                });
+                            }
+                        } catch (error) {
+                            console.error("❌ Error removing from wishlist:", error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred. Please try again.'
+                            });
+                        }
+                    };
+
+                    window.updateVariant = function (selectElement, wishlistId) {
+                        const selectedOption = selectElement.options[selectElement.selectedIndex];
+                        const card = selectElement.closest('.wishlist-card');
+                        const image = card.querySelector('.card-img-top');
+                        const priceElement = card.querySelector('.text-dark');
+                        const originalPriceElement = card.querySelector('.original-price');
+                        const stockStatusElement = card.querySelector('.stock-status');
+                        const addToCartButton = card.querySelector('.btn-add-to-cart');
+
+                        // Update DOM elements
+                        image.src = selectedOption.dataset.image;
+                        priceElement.textContent = `₹${parseFloat(selectedOption.dataset.salePrice).toLocaleString('en-IN')}`;
+                        if (parseFloat(selectedOption.dataset.salePrice) < parseFloat(selectedOption.dataset.price)) {
+                            originalPriceElement.innerHTML = `<s>₹${parseFloat(selectedOption.dataset.price).toLocaleString('en-IN')}</s>`;
+                        } else {
+                            originalPriceElement.innerHTML = '';
+                        }
+                        if (parseInt(selectedOption.dataset.stock) > 0) {
+                            stockStatusElement.textContent = `In Stock (${selectedOption.dataset.stock} left)`;
+                            stockStatusElement.className = 'stock-status mb-2 text-success';
+                            addToCartButton.disabled = false;
+                        } else {
+                            stockStatusElement.textContent = 'Out of Stock';
+                            stockStatusElement.className = 'stock-status mb-2 text-danger';
+                            addToCartButton.disabled = true;
+                        }
+
+                        // Update wishlist variant in the backend
+                        updateWishlistVariant(wishlistId, selectElement.selectedIndex);
+                    };
+
+                    async function updateWishlistVariant(wishlistId, variantIndex) {
+                        try {
+                            const response = await fetch(`/user/wishlist/update/${wishlistId}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({ variantIndex })
+                            });
+
+                            const data = await response.json();
+                            if (!data.success) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: data.message
+                                });
+                            }
+                        } catch (error) {
+                            console.error("❌ Error updating wishlist variant:", error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred. Please try again.'
+                            });
+                        }
+                    }
+
+                    window.addToCartFromWishlist = async function (wishlistId, productId, button) {
+                        const card = button.closest('.wishlist-card');
+                        const variantIndex = card.querySelector('.variant-selector').value;
+
+                        try {
+                            // Add to cart
+                            const cartResponse = await fetch('/user/cart/add', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({ productId, variantIndex })
+                            });
+
+                            const cartData = await cartResponse.json();
+                            if (!cartData.success) {
+                                throw new Error(cartData.message);
+                            }
+
+                            // Remove from wishlist
+                            const wishlistResponse = await fetch(`/user/wishlist/remove/${wishlistId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+
+                            const wishlistData = await wishlistResponse.json();
+                            if (!wishlistData.success) {
+                                throw new Error(wishlistData.message);
+                            }
+
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Added to Cart',
+                                text: 'Product has been added to your cart and removed from your wishlist!',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+
+                            // Remove the item from the DOM
+                            document.querySelector(`[data-wishlist-id="${wishlistId}"]`).remove();
+                            if (document.querySelectorAll('#wishlistContainer .col').length === 0) {
+                                document.getElementById('wishlistContainer').outerHTML = `
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p class="text-black text-shadow">Your wishlist is empty.</p>
+                        <a href="/user/shop" class="btn btn-black">Continue Shopping</a>
+                    </div>
+                </div>
+            `;
+                            }
+
+                            // Dispatch custom events to update header counts
+                            document.dispatchEvent(new Event('cartUpdated'));
+                            document.dispatchEvent(new Event('wishlistUpdated'));
+                        } catch (error) {
+                            console.error("❌ Error adding to cart from wishlist:", error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: error.message || 'An error occurred. Please try again.'
+                            });
+                        }
+                    };
+                });
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    document.querySelectorAll(".page-link").forEach(link => {
+                        link.addEventListener("click", function (e) {
+                            e.preventDefault();
+                            const url = this.getAttribute("href");
+
+                            fetch(url, {
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        updateWishlistUI(data.wishlist);
+                                        updatePaginationUI(data.currentPage, data.totalPages);
+                                    }
+                                })
+                                .catch(error => console.error("Error fetching paginated wishlist:", error));
+                        });
+                    });
+
+                    function updateWishlistUI(wishlist) {
+                        const wishlistContainer = document.getElementById("wishlistContainer");
+                        wishlistContainer.innerHTML = "";
+                        wishlist.forEach(item => {
+                            wishlistContainer.innerHTML += `
+                <div class="col" data-wishlist-id="${item._id}">
+                    <div class="card wishlist-card h-100">
+                        <div class="wishlist-actions">
+                            <button class="btn btn-remove" onclick="removeFromWishlist('${item._id}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <img src="${item.variant.productImage[0]}" class="card-img-top" alt="${item.product.productName}">
+                        <div class="card-body">
+                            <h5 class="card-title">${item.product.productName}</h5>
+                            <p>${item.product.brand.brandName} | ${item.product.category.name}</p>
+                            <p><strong>₹${item.variant.salePrice.toLocaleString('en-IN')}</strong></p>
+                            <button class="btn btn-dark btn-add-to-cart" onclick="addToCartFromWishlist('${item._id}', '${item.product._id}', this)">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+                        });
+                    }
+
+                    function updatePaginationUI(currentPage, totalPages) {
+                        let paginationHTML = "";
+                        if (currentPage > 1) {
+                            paginationHTML += `<li class="page-item"><a class="page-link" href="?page=${currentPage - 1}">Previous</a></li>`;
+                        }
+                        for (let i = 1; i <= totalPages; i++) {
+                            paginationHTML += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="?page=${i}">${i}</a>
+            </li>`;
+                        }
+                        if (currentPage < totalPages) {
+                            paginationHTML += `<li class="page-item"><a class="page-link" href="?page=${currentPage + 1}">Next</a></li>`;
+                        }
+                        document.querySelector(".pagination").innerHTML = paginationHTML;
+                    }
+                });
+            </script>
+</body>
+
+</html>

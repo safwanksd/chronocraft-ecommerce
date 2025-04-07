@@ -70,6 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const deleteBtn = document.createElement('span');
                 deleteBtn.className = 'delete-image';
                 deleteBtn.innerHTML = '×';
+                deleteBtn.dataset.variant = variantIndex;
+                deleteBtn.dataset.image = (container.querySelectorAll('.existing-image').length - 1).toString();
                 deleteBtn.onclick = () => thumbnail.remove();
                 thumbnail.appendChild(deleteBtn);
 
@@ -101,10 +103,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const variantGroups = document.querySelectorAll('.variant-group');
         variantGroups.forEach((group, index) => {
-            formData.append(`variantName[${index}]`, group.querySelector('[name="variantName"]').value);
-            formData.append(`variantColor[${index}]`, group.querySelector('[name="variantColor"]').value);
-            formData.append(`variantPrice[${index}]`, group.querySelector('[name="variantPrice"]').value);
-            formData.append(`variantStock[${index}]`, group.querySelector('[name="variantStock"]').value);
+            const variantName = group.querySelector('[name="variantName"]').value;
+            const variantColor = group.querySelector('[name="variantColor"]').value;
+            const variantPrice = group.querySelector('[name="variantPrice"]').value;
+            const variantSalePrice = group.querySelector('[name="variantSalePrice"]').value; // Ensure this is included
+            const variantStock = group.querySelector('[name="variantStock"]').value;
+
+            if (!variantName || !variantPrice || !variantStock) {
+                Swal.fire('Error', 'All variant fields (Name, Price, Stock) are required!', 'error');
+                return;
+            }
+            if (parseFloat(variantSalePrice) > parseFloat(variantPrice)) {
+                Swal.fire('Error', 'Sale price cannot exceed original price!', 'error');
+                return;
+            }
+
+            formData.append(`variantName[${index}]`, variantName);
+            formData.append(`variantColor[${index}]`, variantColor);
+            formData.append(`variantPrice[${index}]`, variantPrice);
+            formData.append(`variantSalePrice[${index}]`, variantSalePrice || variantPrice); // Default to price if empty
+            formData.append(`variantStock[${index}]`, variantStock);
 
             const images = croppedImagesMap.get(index) || [];
             images.forEach((image, imgIndex) => {
@@ -217,6 +235,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="col-md-2">
                         <label class="form-label">Price</label>
                         <input type="number" name="variantPrice" class="form-control" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sale Price</label>
+                        <input type="number" name="variantSalePrice" class="form-control" required>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Stock</label>

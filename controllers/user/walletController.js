@@ -1,7 +1,9 @@
 // controllers/user/walletController.js
+
 const Wallet = require("../../models/walletSchema");
 const User = require("../../models/userSchema");
 
+// Renders the wallet page with transaction history and totals
 const loadWallet = async (req, res) => {
     try {
         const userId = req.session.user._id;
@@ -35,6 +37,7 @@ const loadWallet = async (req, res) => {
     }
 };
 
+// Adds money to the user's wallet
 const addMoney = async (req, res) => {
     try {
         const userId = req.session.user._id;

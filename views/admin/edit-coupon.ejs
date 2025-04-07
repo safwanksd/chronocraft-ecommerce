@@ -1,0 +1,253 @@
+<!-- admin/edit-coupon.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Edit Coupon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+    <link rel="stylesheet" href="/css/admin-style.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/admin/header.ejs') %>
+        <%- include('../partials/admin/sidebar.ejs') %>
+
+            <div class="content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Edit Coupon</h2>
+                    <a href="/admin/coupons" class="btn btn-secondary">Back to Coupons</a>
+                </div>
+
+                <div class="form-container">
+                    <form id="editCouponForm" novalidate>
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Coupon Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="code" name="code" maxlength="15"
+                                value="<%= coupon.code %>" required readonly>
+                            <div id="codeError" class="error-message">Coupon code must be 1-15 alphanumeric characters
+                                (A-Z, 0-9).</div>
+                            <div id="codeDuplicateError" class="error-message">This coupon code already exists.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"
+                                maxlength="200"><%= coupon.description %></textarea>
+                            <div id="descriptionError" class="error-message">Description cannot exceed 200 characters.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="discountType" class="form-label">Discount Type <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" id="discountType" name="discountType" required>
+                                <option value="percentage" <%=coupon.discountType==='percentage' ? 'selected' : '' %>
+                                    >Percentage</option>
+                                <option value="fixed" <%=coupon.discountType==='fixed' ? 'selected' : '' %>>Fixed Amount
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="discountValue" class="form-label">Discount Value <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="discountValue" name="discountValue" min="0"
+                                value="<%= coupon.discountValue %>" required>
+                            <div id="discountValueError" class="error-message">Percentage must be 0-90% or fixed amount
+                                must be positive.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="minPurchaseAmount" class="form-label">Minimum Purchase Amount (₹) <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="minPurchaseAmount" name="minPurchaseAmount"
+                                min="1" value="<%= coupon.minPurchaseAmount %>" required>
+                            <div id="minPurchaseError" class="error-message">Minimum purchase must be at least 1.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="maxDiscountAmount" class="form-label">Maximum Discount Amount (₹) <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="maxDiscountAmount" name="maxDiscountAmount"
+                                min="1" value="<%= coupon.maxDiscountAmount %>" required>
+                            <div id="maxDiscountError" class="error-message">Maximum discount must be less than minimum
+                                purchase and at least 1.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="validFrom" class="form-label">Valid From <span
+                                    class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="validFrom" name="validFrom"
+                                value="<%= coupon.validFrom %>" required>
+                            <div id="validFromError" class="error-message">Valid From is required.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="validUntil" class="form-label">Valid Until <span
+                                    class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="validUntil" name="validUntil"
+                                value="<%= coupon.validUntil %>" required>
+                            <div id="validUntilError" class="error-message">Valid Until must be after Valid From.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="usageLimit" class="form-label">Usage Limit (Optional)</label>
+                            <input type="number" class="form-control" id="usageLimit" name="usageLimit" min="1"
+                                value="<%= coupon.usageLimit || '' %>">
+                            <div id="usageLimitError" class="error-message">Usage limit must be at least 1.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="perUserLimit" class="form-label">Per User Limit <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="perUserLimit" name="perUserLimit" min="1"
+                                value="<%= coupon.perUserLimit %>" required>
+                            <div id="perUserLimitError" class="error-message">Per user limit must be at least 1.</div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive"
+                                <%=coupon.isActive ? 'checked' : '' %>>
+                            <label class="form-check-label" for="isActive">Active</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Update Coupon</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Required Scripts -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const form = document.getElementById('editCouponForm');
+                    const code = document.getElementById('code');
+                    const description = document.getElementById('description');
+                    const discountValue = document.getElementById('discountValue');
+                    const minPurchaseAmount = document.getElementById('minPurchaseAmount');
+                    const maxDiscountAmount = document.getElementById('maxDiscountAmount');
+                    const validFrom = document.getElementById('validFrom');
+                    const validUntil = document.getElementById('validUntil');
+                    const usageLimit = document.getElementById('usageLimit');
+                    const perUserLimit = document.getElementById('perUserLimit');
+                    const discountType = document.getElementById('discountType');
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+
+                        let isValid = true;
+                        const errors = {};
+
+                        // Validate description length
+                        if (description.value.length > 200) {
+                            errors.description = true;
+                            isValid = false;
+                        }
+
+                        // Validate discount value
+                        if (discountType.value === 'percentage' && (discountValue.value > 90 || discountValue.value < 0)) {
+                            errors.discountValue = true;
+                            isValid = false;
+                        } else if (discountType.value === 'fixed' && discountValue.value < 0) {
+                            errors.discountValue = true;
+                            isValid = false;
+                        }
+
+                        // Validate purchase amounts
+                        if (minPurchaseAmount.value < 1) {
+                            errors.minPurchase = true;
+                            isValid = false;
+                        }
+                        if (maxDiscountAmount.value < 1 || maxDiscountAmount.value >= minPurchaseAmount.value) {
+                            errors.maxDiscount = true;
+                            isValid = false;
+                        }
+
+                        // Validate dates
+                        const fromDate = new Date(validFrom.value);
+                        const untilDate = new Date(validUntil.value);
+                        if (fromDate >= untilDate) {
+                            errors.validUntil = true;
+                            isValid = false;
+                        }
+
+                        // Validate usage limit
+                        if (usageLimit.value && usageLimit.value < 1) {
+                            errors.usageLimit = true;
+                            isValid = false;
+                        }
+
+                        // Validate per user limit
+                        if (perUserLimit.value < 1) {
+                            errors.perUserLimit = true;
+                            isValid = false;
+                        }
+
+                        // Show errors
+                        Object.keys(errors).forEach(key => {
+                            document.getElementById(`${key}Error`).style.display = 'block';
+                        });
+
+                        if (!isValid) {
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`/admin/coupons/${encodeURIComponent('<%= coupon._id %>')}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    code: code.value,
+                                    description: description.value,
+                                    discountType: discountType.value,
+                                    discountValue: parseFloat(discountValue.value),
+                                    minPurchaseAmount: parseFloat(minPurchaseAmount.value),
+                                    maxDiscountAmount: parseFloat(maxDiscountAmount.value),
+                                    validFrom: validFrom.value,
+                                    validUntil: validUntil.value,
+                                    usageLimit: usageLimit.value || null,
+                                    perUserLimit: parseInt(perUserLimit.value),
+                                    isActive: document.getElementById('isActive').checked
+                                })
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                                Swal.fire('Success!', data.message, 'success').then(() => {
+                                    window.location.href = '/admin/coupons';
+                                });
+                            } else {
+                                Swal.fire('Error!', data.message, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error updating coupon:', error);
+                            Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
+                        }
+                    });
+                });
+            </script>
+</body>
+
+</html>

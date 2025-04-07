@@ -2,213 +2,224 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHRONOCRAFT - Luxury Watches</title>
     <link rel="stylesheet" href="/css/home.css">
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <!-- Custom CSS -->
 </head>
+
 <body>
     <!-- Header -->
     <%-include('../partials/user/header.ejs')%>
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">Allow Yourself To Be A Step Ahead</h1>
-                <p class="mb-4">Choose a watch that expresses your uniqueness</p>
-                <a href="/user/shop" class="btn btn-outline-light">SHOP NOW</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section class="services-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 service-item">
-                    <h3>Extended Warranty</h3>
-                    <p>Up to 5 Year Warranty</p>
-                </div>
-                <div class="col-md-4 service-item">
-                    <h3>Free Shipping</h3>
-                    <p>On Orders Above $299</p>
-                </div>
-                <div class="col-md-4 service-item">
-                    <h3>Free 30 Day Returns</h3>
-                    <p>Money Back Guarantee</p>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Allow Yourself To Be A Step Ahead</h1>
+                    <p class="mb-4">Choose a watch that expresses your uniqueness</p>
+                    <a href="/user/shop" class="btn btn-outline-light">SHOP NOW</a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Collections Section -->
-    <section class="collections-section">
-        <div class="container">
-            <h2 class="section-title">DISCOVER THE COLLECTIONS</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="collection-card">
-                        <a href="/user/men" class="collection-link">
-                            <img src="/images/shop-for-him.png" alt="Men's Collection" class="collection-image">
-                            <div class="collection-overlay">
-                                <h3 class="collection-title title-bordered">SHOP FOR HIM</h3>
-                            </div>
-                        </a>
+        <!-- Services Section -->
+        <section class="services-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 service-item">
+                        <h3>Extended Warranty</h3>
+                        <p>Up to 5 Year Warranty</p>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="collection-card">
-                        <a href="/user/shop" class="collection-link">
-                            <img src="/images/explore-shop.png" alt="Explore Collection" class="collection-image">
-                            <div class="collection-overlay">
-                                <h3 class="collection-title title-explore">EXPLORE</h3>
-                            </div>
-                        </a>
+                    <div class="col-md-4 service-item">
+                        <h3>Free Shipping</h3>
+                        <p>On Orders Above $299</p>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="collection-card">
-                        <a href="/user/women" class="collection-link">
-                            <img src="/images/shop-for-her.png" alt="Women's Collection" class="collection-image">
-                            <div class="collection-overlay">
-                                <h3 class="collection-title title-bordered">SHOP FOR HER</h3>
-                            </div>
-                        </a>
+                    <div class="col-md-4 service-item">
+                        <h3>Free 30 Day Returns</h3>
+                        <p>Money Back Guarantee</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Featured Products Section -->
-    <section class="featured-products-section">
-        <div class="container">
-            <h2 class="section-title">Featured Products</h2>
-            <div class="row row-cols-1 row-cols-md-4 g-4">
-                <% if (products && products.length > 0) { %>
-                    <% products.forEach(product => { %>
-                        <div class="col">
-                            <div class="card product-card h-100">
-                                <img src="<%= product.variants[0].productImages[0] %>" 
-                                     class="card-img-top" 
-                                     alt="<%= product.productName %>">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title text-black text-shadow"><%= product.productName %></h5>
-                                    <p class="card-text text-gray mb-2"><%= product.brand.brandName %></p>
-                                    <p class="card-text mb-3"><strong class="text-dark">₹<%= product.variants[0].price %></strong></p>
-                                    <% if (user) { %>
-                                        <a href="/user/product-detail/<%= product._id %>" class="btn btn-black mt-auto">View Details</a>
-                                    <% } else { %>
-                                        <a href="/user/login" class="btn btn-black mt-auto">View Details</a>
-                                    <% } %>
+        <!-- Collections Section -->
+        <section class="collections-section">
+            <div class="container">
+                <h2 class="section-title">DISCOVER THE COLLECTIONS</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="collection-card">
+                            <a href="/user/men" class="collection-link">
+                                <img src="/images/shop-for-him.png" alt="Men's Collection" class="collection-image">
+                                <div class="collection-overlay">
+                                    <h3 class="collection-title title-bordered">SHOP FOR HIM</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="collection-card">
+                            <a href="/user/shop" class="collection-link">
+                                <img src="/images/explore-shop.png" alt="Explore Collection" class="collection-image">
+                                <div class="collection-overlay">
+                                    <h3 class="collection-title title-explore">EXPLORE</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="collection-card">
+                            <a href="/user/women" class="collection-link">
+                                <img src="/images/shop-for-her.png" alt="Women's Collection" class="collection-image">
+                                <div class="collection-overlay">
+                                    <h3 class="collection-title title-bordered">SHOP FOR HER</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products Section -->
+        <section class="featured-products-section">
+            <div class="container">
+                <h2 class="section-title">Featured Products</h2>
+                <div class="row row-cols-1 row-cols-md-4 g-4">
+                    <% if (products && products.length> 0) { %>
+                        <% products.forEach(product=> { %>
+                            <div class="col">
+                                <div class="card product-card h-100">
+                                    <img src="<%= product.variants[0].productImages[0] %>" class="card-img-top"
+                                        alt="<%= product.productName %>">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title text-black text-shadow">
+                                            <%= product.productName %>
+                                        </h5>
+                                        <p class="card-text text-gray mb-2">
+                                            <%= product.brand.brandName %>
+                                        </p>
+                                        <p class="card-text mb-3"><strong class="text-dark">₹<%=
+                                                    product.variants[0].price %></strong></p>
+                                        <% if (user) { %>
+                                            <a href="/user/product-detail/<%= product._id %>"
+                                                class="btn btn-black mt-auto">View Details</a>
+                                            <% } else { %>
+                                                <a href="/user/login" class="btn btn-black mt-auto">View Details</a>
+                                                <% } %>
+                                    </div>
                                 </div>
                             </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <p class="text-center">No featured products available.</p>
+                                    <% } %>
+                </div>
+            </div>
+        </section>
+        <!-- Brands Section -->
+        <section class="brands-section">
+            <div class="container">
+                <h2 class="section-title">Brands We Love</h2>
+                <div class="row align-items-center justify-content-center g-4">
+                    <div class="col-4 col-md-2">
+                        <div class="brand-container">
+                            <img src="/images/BrandLogos/tissot-logo.png" alt="Tissot" class="brand-logo">
                         </div>
-                    <% }); %>
-                <% } else { %>
-                    <p class="text-center">No featured products available.</p>
-                <% } %>
-            </div>
-        </div>
-    </section>
-    <!-- Brands Section -->
-    <section class="brands-section">
-        <div class="container">
-            <h2 class="section-title">Brands We Love</h2>
-            <div class="row align-items-center justify-content-center g-4">
-              <div class="col-4 col-md-2">
-                <div class="brand-container">
-                    <img src="/images/BrandLogos/tissot-logo.png" alt="Tissot" class="brand-logo">
-                </div>
-            </div>
-              <div class="col-4 col-md-2">
-                <div class="brand-container">
-                    <img src="/images/BrandLogos/rado-logo.png" alt="Rado" class="brand-logo">
-                </div>
-            </div>
-            <div class="col-4 col-md-2">
-                <div class="brand-container">
-                    <img src="/images/BrandLogos/armani_exchange-logo.png" alt="Armani_exchange" class="brand-logo">
-                </div>
-            </div>
-                <div class="col-4 col-md-2">
-                    <div class="brand-container">
-                        <img src="/images/BrandLogos/bailmain-logo.png" alt="Balmain" class="brand-logo">
                     </div>
-                </div>
-                <div class="col-4 col-md-2">
-                    <div class="brand-container">
-                        <img src="/images/BrandLogos/casio-logo.png" alt="Casio" class="brand-logo">
+                    <div class="col-4 col-md-2">
+                        <div class="brand-container">
+                            <img src="/images/BrandLogos/rado-logo.png" alt="Rado" class="brand-logo">
+                        </div>
                     </div>
-                </div>
-                <div class="col-4 col-md-2">
-                    <div class="brand-container">
-                        <img src="/images/BrandLogos/versace-logo.png" alt="Versace" class="brand-logo">
+                    <div class="col-4 col-md-2">
+                        <div class="brand-container">
+                            <img src="/images/BrandLogos/armani_exchange-logo.png" alt="Armani_exchange"
+                                class="brand-logo">
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <div class="brand-container">
+                            <img src="/images/BrandLogos/bailmain-logo.png" alt="Balmain" class="brand-logo">
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <div class="brand-container">
+                            <img src="/images/BrandLogos/casio-logo.png" alt="Casio" class="brand-logo">
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <div class="brand-container">
+                            <img src="/images/BrandLogos/versace-logo.png" alt="Versace" class="brand-logo">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Original Watches Section -->
-    <section class="original-watches">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <img src="/images/BrandLogos/original-watches.png" alt="Original Watches" class="img-fluid">
-                </div>
-                <div class="col-md-6">
-                    <h2>100% ORIGINAL & BRAND NEW WATCHES</h2>
-                    <p>For 25 Years, ChronoCraft Has Been The Trusted Destination For Genuine Timepieces. As An Authorized Retailer For Every Brand We Feature, Authenticity Is Our Promise. Discover Watches Crafted With Passion, Backed By Our Legacy Of Excellence.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Watch Showcase Section -->
-    <section class="watch-showcase">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="showcase-content">
-                        <p class="showcase-text">
-                            Choose a watch that will not only be an <br>
-                            integral part of your style but also a <br>
-                            symbol of your unparalleled precision.
-                        </p>
+        <!-- Original Watches Section -->
+        <section class="original-watches">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <img src="/images/BrandLogos/original-watches.png" alt="Original Watches" class="img-fluid">
+                    </div>
+                    <div class="col-md-6">
+                        <h2>100% ORIGINAL & BRAND NEW WATCHES</h2>
+                        <p>For 25 Years, ChronoCraft Has Been The Trusted Destination For Genuine Timepieces. As An
+                            Authorized Retailer For Every Brand We Feature, Authenticity Is Our Promise. Discover
+                            Watches Crafted With Passion, Backed By Our Legacy Of Excellence.</p>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <img src="/images/watch-section.jpg" alt="Luxury Watch" class="showcase-image">
+            </div>
+        </section>
+
+        <!-- Watch Showcase Section -->
+        <section class="watch-showcase">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="showcase-content">
+                            <p class="showcase-text">
+                                Choose a watch that will not only be an <br>
+                                integral part of your style but also a <br>
+                                symbol of your unparalleled precision.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="/images/watch-section.jpg" alt="Luxury Watch" class="showcase-image">
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
-    <%-include('../partials/user/footer.ejs')%>
+        <!-- Footer -->
+        <%-include('../partials/user/footer.ejs')%>
 
-    <!-- Toast Container for Notifications -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+            <!-- Toast Container for Notifications -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <!-- Scripts -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </body>
+
 </html>
 
 <script>
     // Home page functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         console.log("✅ Home Page Scripts Loaded");
 
         // Toast Notification System
@@ -220,7 +231,7 @@
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                     </div>
                 </div>`;
-            
+
             const toastContainer = document.querySelector('.toast-container');
             if (toastContainer) {
                 toastContainer.innerHTML = toastHTML;
@@ -238,7 +249,7 @@
                     card.addEventListener('mouseenter', () => {
                         image.style.transform = 'scale(1.05)';
                     });
-                    
+
                     card.addEventListener('mouseleave', () => {
                         image.style.transform = 'scale(1)';
                     });
@@ -251,7 +262,7 @@
     });
 
     // Export functions that might be needed by other scripts
-    window.showToast = function(message, type) {
+    window.showToast = function (message, type) {
         const toastContainer = document.querySelector('.toast-container');
         if (toastContainer) {
             toastContainer.innerHTML = `

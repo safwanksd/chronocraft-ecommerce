@@ -1,9 +1,10 @@
-// passport.js
+// middlewares/passport.js
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
 
+// Configures Google OAuth2 strategy for user authentication
 passport.use(
     new GoogleStrategy(
         {
@@ -19,10 +20,7 @@ passport.use(
                     return done(null, existingUser);
                 }
 
-                console.log(profile.emails); // Log the profile.emails array
-
                 const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null;
-
 
                 const newUser = new User({
                     googleId: profile.id,
@@ -39,10 +37,12 @@ passport.use(
     )
 );
 
+// Serializes user data into the session
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
 
+// Deserializes user data from the session
 passport.deserializeUser(async (id, done) => {
     try {
         const user = await User.findById(id);

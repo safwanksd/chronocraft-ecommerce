@@ -1,5 +1,5 @@
-<!-- ✅ Header -->
-
+<!-- partials/user/header.ejs -->
+ 
 <link rel="stylesheet" href="/css/header-footer.css">
 
 <!-- ✅ Navigation -->
@@ -23,33 +23,49 @@
             <div class="nav-item dropdown profile-dropdown">
                 <a class="nav-link d-flex align-items-center" href="#" id="profileDropdown">
                     <% if (user) { %>
-                        <span class="user-name me-2"><%= user.name %></span>
-                    <% } %>
-                    <i class="fas fa-user profile-icon"></i>
+                        <span class="user-name me-2">
+                            <%= user.name %>
+                        </span>
+                        <% } %>
+                            <i class="fas fa-user profile-icon"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" id="profileMenu">
                     <% if (user) { %>
                         <!-- 🔹 Logged-in User -->
                         <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li><a class="dropdown-item logout-btn" href="/user/logout">Logout</a></li>
-                    <% } else { %>
-                        <!-- 🔹 Guest User -->
-                        <li><a class="dropdown-item" href="/user/login">Login</a></li>
-                        <li><a class="dropdown-item" href="/user/signup">Sign Up</a></li>
-                    <% } %>
+                        <% } else { %>
+                            <!-- 🔹 Guest User -->
+                            <li><a class="dropdown-item" href="/user/login">Login</a></li>
+                            <li><a class="dropdown-item" href="/user/signup">Sign Up</a></li>
+                            <% } %>
                 </ul>
             </div>
-            <a class="nav-link" href="/wishlist"><i class="fas fa-heart"></i></a>
-            <a class="nav-link" href="/user/cart"><i class="fas fa-shopping-bag"></i></a>
+            <a class="nav-link position-relative" href="/user/wishlist">
+                <i class="fas fa-heart"></i>
+                <span class="badge bg-danger rounded-pill wishlist-count"
+                    style="display: <%= locals.wishlistCount && wishlistCount > 0 ? 'inline-block' : 'none' %>;">
+                    <%= locals.wishlistCount || 0 %>
+                </span>
+            </a>
+            <a class="nav-link position-relative" href="/user/cart">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="badge bg-danger rounded-pill cart-count"
+                    style="display: <%= locals.cartCount && cartCount > 0 ? 'inline-block' : 'none' %>;">
+                    <%= locals.cartCount || 0 %>
+                </span>
+            </a>
         </div>
     </div>
 </nav>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         console.log("✅ Header Loaded");
-    
+
         // Navbar Scroll Effect
         function handleNavbarScroll() {
             const navbar = document.querySelector('.navbar');
@@ -60,15 +76,15 @@
             }
         }
         window.addEventListener('scroll', handleNavbarScroll);
-    
+
         // Profile Dropdown Behavior (Improved for stability)
         const profileDropdown = document.querySelector('.profile-dropdown');
         const dropdownMenu = profileDropdown?.querySelector('.dropdown-menu');
-    
+
         if (profileDropdown && dropdownMenu) {
             let isOpen = false;
             let timeoutId;
-    
+
             const showDropdown = () => {
                 clearTimeout(timeoutId);
                 dropdownMenu.style.display = 'block';
@@ -76,7 +92,7 @@
                 dropdownMenu.style.visibility = 'visible';
                 isOpen = true;
             };
-    
+
             const hideDropdown = () => {
                 timeoutId = setTimeout(() => {
                     dropdownMenu.style.opacity = '0';
@@ -86,7 +102,7 @@
                     }, 300); // Match CSS transition duration
                 }, 200);
             };
-    
+
             profileDropdown.addEventListener('mouseenter', showDropdown);
             profileDropdown.addEventListener('mouseleave', () => {
                 isOpen = false;
@@ -100,7 +116,7 @@
                 isOpen = false;
                 hideDropdown();
             });
-    
+
             // Close dropdown on click outside (optional, can be removed if not needed)
             document.addEventListener('click', (e) => {
                 if (!profileDropdown.contains(e.target) && isOpen) {
@@ -113,9 +129,9 @@
                 }
             });
         }
-    
+
         // Redirect Non-Logged Users to Login on Protected Links
-        const authLinks = document.querySelectorAll('a[href="/wishlist"], a[href="/cart"]');
+        const authLinks = document.querySelectorAll('a[href="/user/wishlist"], a[href="/user/cart"]');
         authLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 <% if (!user) { %>
@@ -124,19 +140,56 @@
                 <% } %>
             });
         });
-    
+
         // Logout Button Handler
-        document.querySelector(".logout-btn").addEventListener("click", function (event) {
-            event.preventDefault();
-    
-            fetch("/user/logout")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = data.redirectUrl;
+        const logoutBtn = document.querySelector(".logout-btn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function (event) {
+                event.preventDefault();
+                fetch("/user/logout")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirectUrl;
+                        }
+                    })
+                    .catch(error => console.error("Logout failed:", error));
+            });
+        }
+
+        // Function to update cart and wishlist counts dynamically
+        async function updateHeaderCounts() {
+            try {
+                const response = await fetch('/user/counts', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Update cart count
+                    const cartBadge = document.querySelector('.cart-count');
+                    if (cartBadge) {
+                        cartBadge.textContent = data.cartCount;
+                        cartBadge.style.display = data.cartCount > 0 ? 'inline-block' : 'none';
                     }
-                })
-                .catch(error => console.error("Logout failed:", error));
-        });
+
+                    // Update wishlist count
+                    const wishlistBadge = document.querySelector('.wishlist-count');
+                    if (wishlistBadge) {
+                        wishlistBadge.textContent = data.wishlistCount;
+                        wishlistBadge.style.display = data.wishlistCount > 0 ? 'inline-block' : 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('[HEADER] Error updating counts:', error);
+            }
+        }
+
+        // Initial update of counts on page load
+        updateHeaderCounts();
+
+        // Listen for custom events to update counts dynamically
+        document.addEventListener('cartUpdated', updateHeaderCounts);
+        document.addEventListener('wishlistUpdated', updateHeaderCounts);
     });
-    </script>
+</script>

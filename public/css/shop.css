@@ -320,6 +320,23 @@ h2 {
     cursor: not-allowed;
 }
 
+/* offer badge */
+.offer-badge {
+    display: inline-block;
+    background-color: #dc3545; /* Red for contrast */
+    color: #fff;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+    font-weight: 500;
+    font-family: var(--primary-font);
+  }
+  
+  .offer-badge:empty {
+    display: none;
+  }
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
     .row-cols-lg-4 {
@@ -397,3 +414,4 @@ h2 {
 .text-black {
     color: #000 !important;
 }
+

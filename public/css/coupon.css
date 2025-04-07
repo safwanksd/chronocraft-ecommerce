@@ -1,0 +1,34 @@
+
+/* public/css/admin/coupon.css */
+.content {
+    margin-left: 250px;
+    padding: 20px;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table thead th {
+    background-color: #6a0dad;
+    color: white;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.bg-success { background-color: #28a745; }
+.bg-warning { background-color: #ffc107; }
+.bg-danger { background-color: #dc3545; }
+
+.btn-info { background-color: #17a2b8; border-color: #17a2b8; }
+.btn-danger { background-color: #dc3545; border-color: #dc3545; }
+
+.form-control[readonly] {
+    background-color: #fff;
+    opacity: 1;
+}

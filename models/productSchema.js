@@ -25,7 +25,7 @@ const productSchema = new Schema({
     productOffer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Offer",
-        default: null // Offer will be implemented in the future
+        default: null 
     },
     variants: [{
         color: {

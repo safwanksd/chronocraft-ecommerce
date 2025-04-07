@@ -1,187 +1,248 @@
+<!-- admin/order-details.ejs -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Order Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/admin-style.css">
     <style>
         .content {
-            margin-left: 200px; /* Match sidebar width */
+            margin-left: 200px;
+            /* Match sidebar width */
             padding: 20px;
-            background-color: #f8f9fa; /* Light grey background */
+            background-color: #f8f9fa;
+            /* Light grey background */
         }
 
         .card {
-            background-color: #ffffff; /* White card background */
+            background-color: #ffffff;
+            /* White card background */
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
 
         .card-header {
-            background-color: #007bff; /* Navy blue header */
-            color: #ffffff; /* White text */
+            background-color: #007bff;
+            /* Navy blue header */
+            color: #ffffff;
+            /* White text */
         }
 
-        .status-processing { background-color: #ffcc00; color: #000; } /* Yellow for Processing */
-        .status-delivered { background-color: #007bff; color: #fff; } /* Navy blue for Delivered */
-        .status-cancelled { background-color: #dc3545; color: #fff; } /* Red for Cancelled */
-        .status-failed { background-color: #dc3545; color: #fff; } /* Red for Failed */
-        .status-returned { background-color: #dc3545; color: #fff; } /* Red for Returned */
+        .status-processing {
+            background-color: #ffcc00;
+            color: #000;
+        }
 
-        .return-approved { color: #28a745; } /* Green for Return Approved */
-        .return-rejected { color: #dc3545; } /* Red for Return Rejected */
+        /* Yellow for Processing */
+        .status-shipped {
+            background-color: #17a2b8;
+            color: #fff;
+        }
 
-        .btn-primary { background-color: #007bff; border-color: #007bff; } /* Navy blue buttons */
-        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+        /* Cyan for Shipped */
+        .status-delivered {
+            background-color: #007bff;
+            color: #fff;
+        }
 
-        .text-success { color: #28a745; } /* Green for Completed */
-        .text-warning { color: #ffcc00; } /* Yellow for Pending */
-        .text-danger { color: #dc3545; } /* Red for Failed or Order Cancelled */
+        /* Navy blue for Delivered */
+        .status-cancelled {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        /* Red for Cancelled */
+        .status-failed {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        /* Red for Failed */
+        .status-return-requested {
+            background-color: #ffcc00;
+            color: #000;
+        }
+
+        /* Yellow for Return Requested */
+        .status-returned {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        /* Red for Returned */
+
+        .return-approved {
+            color: #28a745;
+        }
+
+        /* Green for Return Approved */
+        .return-rejected {
+            color: #dc3545;
+        }
+
+        /* Red for Return Rejected */
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        /* Navy blue buttons */
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        /* Green for Completed */
+        .text-warning {
+            color: #ffcc00;
+        }
+
+        /* Yellow for Pending */
+        .text-danger {
+            color: #dc3545;
+        }
+
+        /* Red for Failed or Order Cancelled */
     </style>
 </head>
+
 <body>
     <%- include('../partials/admin/header.ejs') %>
-    <%- include('../partials/admin/sidebar.ejs') %>
+        <%- include('../partials/admin/sidebar.ejs') %>
 
-    <div class="content">
-        <a href="/admin/orders" class="btn btn-secondary mb-3">Back to Orders</a>
-        <div class="card">
-            <div class="card-header">
-                Order #<%= order.orderNumber %> <span class="badge <%= order.orderStatus === 'Processing' ? 'status-processing' : order.orderStatus === 'Delivered' ? 'status-delivered' : order.orderStatus === 'Cancelled' ? 'status-cancelled' : order.orderStatus === 'Failed' ? 'status-failed' : 'status-returned' %>"><%= order.orderStatus %></span>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <h5>Customer Information</h5>
-                        <p>Name: <%= order.user?.name || 'N/A' %></p>
-                        <p>Email: <%= order.user?.email || 'N/A' %></p>
-                    </div>
-                    <div class="col-md-3">
-                        <h5>Shipping Address</h5>
-                        <p><%= order.shippingAddress?.street || 'N/A' %>, <%= order.shippingAddress?.city || 'N/A' %>, <%= order.shippingAddress?.state || 'N/A' %>, <%= order.shippingAddress?.zipCode || 'N/A' %></p>
-                    </div>
-                    <div class="col-md-3">
-                        <h5>Payment Information</h5>
-                        <p>Method: <%= order.payment.method === 'COD' ? 'COD' : 'RAZORPAY' %></p>
-                        <p>Status: <span class="<%= order.payment.status === 'Completed' ? 'text-success' : order.payment.status === 'Pending' ? 'text-warning' : order.payment.status === 'Failed' || order.payment.status === 'Order Cancelled' ? 'text-danger' : '' %>"><%= order.payment.status %></span></p>
-                    </div>
-                    <div class="col-md-3">
-                        <h5>Order Summary</h5>
-                        <p>Actual Total: ₹<%= order.pricing.subtotal %></p>
-                        <p>Shipping Fee: ₹<%= order.pricing.shippingFee %></p>
-                        <p>Final Amount: ₹<%= order.pricing.finalAmount %></p>
-                    </div>
-                </div>
+            <div class="content">
+                <h2>Order Details</h2>
+                <a href="/admin/orders" class="btn btn-secondary mb-4">Back to Orders</a>
 
-                <h5 class="mt-4">Order Items</h5>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Product Image</th>
-                            <th>Product Name</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Item Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% order.items.forEach(item => { %>
-                            <tr>
-                                <td>
-                                    <% if (item.product && item.product.variants && item.product.variants[item.variantIndex]?.productImages[0]) { %>
-                                        <img src="<%= item.product.variants[item.variantIndex].productImages[0] %>" width="60" height="60" alt="<%= item.product.productName %>">
-                                    <% } else { %>
-                                        <img src="/images/placeholder-product.jpg" width="60" height="60" alt="No image available">
-                                    <% } %>
-                                </td>
-                                <td><%= item.product?.productName || 'N/A' %></td>
-                                <td><%= item.quantity %></td>
-                                <td>₹<%= item.price %></td>
-                                <td>₹<%= item.price * item.quantity %></td>
-                                <td>
-                                    <span class="<%= item.status.itemStatus === 'Processing' ? 'status-processing' : item.status.itemStatus === 'Delivered' ? 'status-delivered' : item.status.itemStatus === 'Cancelled' ? 'status-cancelled' : item.status.itemStatus === 'Failed' ? 'status-failed' : 'status-returned' %>">
-                                        <%= item.status.itemStatus %>
+                <!-- Order Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order #<%= order.orderNumber %>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Customer:</strong>
+                                    <%= order.user?.name || 'N/A' %> (<%= order.user?.email || 'N/A' %>)
+                                </p>
+                                <p><strong>Order Date:</strong>
+                                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                                        <%= new Date(order.createdAt).toLocaleTimeString() %>
+                                </p>
+                                <p><strong>Status:</strong>
+                                    <span class="status-<%= order.orderStatus.toLowerCase() %>">
+                                        <%= order.orderStatus %>
                                     </span>
-                                    <% if (item.status.return.requested) { %>
-                                        <br><small>Return: <%= item.status.return.status %></small>
-                                    <% } else if (item.status.return.status === 'Approved') { %>
-                                        <br><small class="return-approved">Return: Approved</small>
-                                    <% } else if (item.status.return.status === 'Rejected') { %>
-                                        <br><small class="return-rejected">Return: Rejected</small>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-
-                <h5 class="mt-4">Return Requests</h5>
-                <% if (order.items.some(item => item.status.return.requested || item.status.return.status === 'Approved' || item.status.return.status === 'Rejected')) { %>
-                    <ul class="list-group">
-                        <% order.items.forEach(item => { %>
-                            <% if (item.status.return.requested || item.status.return.status === 'Approved' || item.status.return.status === 'Rejected') { %>
-                                <li class="list-group-item">
-                                    Product: <%= item.product?.productName || 'N/A' %>
-                                    <br>Reason: <%= item.status.return.reason || 'N/A' %>
-                                    <br>Status: <span class="<%= item.status.return.status === 'Approved' ? 'return-approved' : item.status.return.status === 'Rejected' ? 'return-rejected' : '' %>"><%= item.status.return.status || 'Pending' %></span>
-                                </li>
-                            <% } %>
-                        <% }); %>
-                    </ul>
-                <% } else { %>
-                    <p>No return requests for this order.</p>
-                <% } %>
-
-                <h5 class="mt-4">Order Timeline</h5>
-                <ul class="list-group">
-                    <li class="list-group-item">Order placed: <%= new Date(order.createdAt).toLocaleString() %></li>
-                    <% if (order.orderStatus === 'Shipped') { %>
-                        <li class="list-group-item">Shipped: <%= new Date(order.updatedAt).toLocaleString() %></li>
-                    <% } %>
-                    <% if (order.orderStatus === 'Out for Delivery') { %>
-                        <li class="list-group-item">Out for Delivery: <%= new Date(order.updatedAt).toLocaleString() %></li>
-                    <% } %>
-                    <% if (order.orderStatus === 'Delivered') { %>
-                        <li class="list-group-item">Delivered: <%= new Date(order.updatedAt).toLocaleString() %></li>
-                    <% } %>
-                    <% if (order.orderStatus === 'Cancelled') { %>
-                        <li class="list-group-item">Cancelled: <%= new Date(order.updatedAt).toLocaleString() %></li>
-                    <% } %>
-                    <% if (order.orderStatus === 'Failed') { %>
-                        <li class="list-group-item">Failed: <%= new Date(order.updatedAt).toLocaleString() %></li>
-                    <% } %>
-                    <% if (order.orderStatus === 'Returned') { %>
-                        <li class="list-group-item">Returned: <%= new Date(order.updatedAt).toLocaleString() %></li>
-                    <% } %>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
-            toast.style.zIndex = '1050';
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </p>
+                                <p><strong>Payment Method:</strong>
+                                    <%= order.payment.method %>
+                                        <span
+                                            class="ms-2 <%= order.payment.status === 'Completed' ? 'text-success' : order.payment.status === 'Pending' ? 'text-warning' : 'text-danger' %>">
+                                            <%= order.payment.status==='Order Cancelled' ? 'Order Cancelled' :
+                                                order.payment.status %>
+                                        </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Shipping Address:</strong></p>
+                                <address>
+                                    <%= order.shippingAddress?.fullName || 'N/A' %>,<br>
+                                        <%= order.shippingAddress?.addressLine1 || '' %>,
+                                            <%= order.shippingAddress?.addressLine2 || '' %><br>
+                                                <%= order.shippingAddress?.city || '' %>, <%=
+                                                        order.shippingAddress?.state || '' %>,
+                                                        <%= order.shippingAddress?.postalCode || '' %><br>
+                                                            <%= order.shippingAddress?.country || '' %><br>
+                                                                Phone: <%= order.shippingAddress?.phone || 'N/A' %>
+                                </address>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            `;
-            document.body.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
 
-            setTimeout(() => {
-                bsToast.hide();
-                toast.remove();
-            }, 3000);
-        }
-    </script>
+                <!-- Order Items -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Items</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Variant</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Subtotal</th>
+                                        <th>Return Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% order.items.forEach(item=> { %>
+                                        <tr>
+                                            <td>
+                                                <%= item.product?.productName || 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= item.product?.variants[item.variantIndex]?.colorName || 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= item.quantity %>
+                                            </td>
+                                            <td>₹<%= item.price.toFixed(2) %>
+                                            </td>
+                                            <td>₹<%= (item.price * item.quantity).toFixed(2) %>
+                                            </td>
+                                            <td>
+                                                <% if (item.status.return.requested) { %>
+                                                    <span class="text-warning">Return Requested (Reason: <%=
+                                                            item.status.return.reason %>)</span>
+                                                    <% } else if (item.status.return.status==='Approved' ) { %>
+                                                        <span class="return-approved">Return Approved</span>
+                                                        <% } else if (item.status.return.status==='Rejected' ) { %>
+                                                            <span class="return-rejected">Return Rejected</span>
+                                                            <% } else { %>
+                                                                <span>-</span>
+                                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Pricing Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Subtotal:</strong> ₹<%= order.pricing.subtotal.toFixed(2) %>
+                        </p>
+                        <p><strong>Shipping Fee:</strong> ₹<%= order.pricing.shippingFee.toFixed(2) %>
+                        </p>
+                        <p><strong>Discount:</strong> ₹<%= order.pricing.discount ? order.pricing.discount.toFixed(2)
+                                : '0.00' %>
+                        </p>
+                        <p><strong>Final Amount:</strong> ₹<%= order.pricing.finalAmount.toFixed(2) %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 
-// adminAuth.js
+// middlewares/adminAuth.js
+// Middleware to protect admin routes by checking if the user is an admin
 const adminAuth = (req, res, next) => {
     if (req.session.admin) {
         // Prevent browser caching

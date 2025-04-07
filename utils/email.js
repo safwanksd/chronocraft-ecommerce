@@ -1,7 +1,9 @@
 // utils/email.js
+
 const nodemailer = require("nodemailer");
 const env = require("dotenv").config();
 
+// Sends a verification email with an OTP to the specified email address
 async function sendVerificationEmail(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
@@ -30,4 +32,6 @@ async function sendVerificationEmail(email, otp) {
     }
 }
 
-module.exports = { sendVerificationEmail };
+module.exports = {
+    sendVerificationEmail,
+};

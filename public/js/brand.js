@@ -33,8 +33,8 @@ async function toggleBrandStatus(id) {
         confirmButtonText: "Yes, change it!"
     }).then(async (result) => {
         if (result.isConfirmed) {
-            const response = await fetch("/admin/brands/block-unblock", {
-                method: "POST",
+            const response = await fetch("/admin//brands/:id/status", {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id })
             });
@@ -58,7 +58,7 @@ async function deleteBrand(id) {
     }).then(async (result) => {
         if (result.isConfirmed) {
             const response = await fetch("/admin/brands/delete", {
-                method: "POST",
+                method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id })
             });

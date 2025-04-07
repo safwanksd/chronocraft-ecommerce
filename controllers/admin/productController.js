@@ -1,54 +1,11 @@
-// controller/admin/productController.js
+// controllers/admin/productController.js
+
 const Product = require("../../models/productSchema");
 const Brand = require("../../models/brandSchema");
 const Category = require("../../models/categorySchema");
-const sharp = require("sharp");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require('../../config/cloudinary');
 
-// Image processing middleware
-const processImages = async (req, res, next) => {
-    console.log("🛠 Processing Images Middleware Called...");
-
-    if (!req.files || req.files.length === 0) {
-        console.error("❌ No images uploaded!");
-        return res.status(400).json({ error: "No images uploaded" });
-    }
-
-    try {
-        const processedImages = [];
-
-        for (const file of req.files) {
-            const outputFilename = `processed-${Date.now()}-${file.filename}`;
-            const outputPath = path.join(file.destination, outputFilename);
-
-            console.log(`🔄 Processing image: ${file.filename} -> ${outputFilename}`);
-
-            await sharp(file.path)
-                .resize({ width: 800 })
-                .jpeg({ quality: 80 })
-                .toFile(outputPath);
-
-            setTimeout(() => {
-                fs.unlink(file.path, (err) => {
-                    if (err) console.error(`❌ Failed to delete original image: ${file.path}`, err);
-                    else console.log(`✅ Deleted original image: ${file.path}`);
-                });
-            }, 500);
-
-            processedImages.push(outputFilename);
-        }
-
-        console.log("📸 Processed Images:", processedImages);
-        req.processedImages = processedImages; // Store processed images in req
-
-        next();
-    } catch (error) {
-        console.error("❌ Image Processing Error:", error);
-        return res.status(500).json({ error: "Error processing images" });
-    }
-};
-
+// Retrieves a paginated list of products with search functionality
 const getProducts = async (req, res) => {
     try {
         let { search = '', page = 1 } = req.query;
@@ -86,66 +43,86 @@ const getProducts = async (req, res) => {
             limit
         });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error fetching products:', error);
         res.status(500).send('Server Error');
     }
 };
 
+// Renders the page to add a new product with available categories and brands
 const getAddProductPage = async (req, res) => {
     try {
         const categories = await Category.find({});
         const brands = await Brand.find({});
         res.render('admin/add-product', { categories, brands });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error loading add product page:', error);
         res.status(500).send('Server Error');
     }
 };
 
+// Processes the creation of a new product with variants and images
 const addProduct = async (req, res) => {
     try {
-        console.log('🚀 Received Product Data:', req.body);
-        console.log('📸 Processed Images:', req.processedImages);
-
         const { productName, description, category, brand } = req.body;
-
-        if (!productName || !description || !category || !brand) {
-            return res.status(400).json({ success: false, message: 'All fields are required!' });
-        }
 
         const variants = [];
         const variantNames = Array.isArray(req.body['variantName']) ? req.body['variantName'] : [req.body['variantName']];
         const variantColors = Array.isArray(req.body['variantColor']) ? req.body['variantColor'] : [req.body['variantColor']];
         const variantPrices = Array.isArray(req.body['variantPrice']) ? req.body['variantPrice'] : [req.body['variantPrice']];
-        const variantSalePrices = Array.isArray(req.body['variantSalePrice']) ? req.body['variantSalePrice'] : [req.body['variantSalePrice'] || []];
+        const variantSalePrices = Array.isArray(req.body['variantSalePrice']) ? req.body['variantSalePrice'] : [req.body['variantSalePrice']];
         const variantStocks = Array.isArray(req.body['variantStock']) ? req.body['variantStock'] : [req.body['variantStock']];
 
-        for (let i = 0; i < Math.max(variantNames.length, variantPrices.length); i++) {
+        const variantCount = Math.max(
+            variantNames.length,
+            variantColors.length,
+            variantPrices.length,
+            variantSalePrices.length,
+            variantStocks.length
+        );
+
+        // Validate images and data for each variant
+        for (let i = 0; i < variantCount; i++) {
             const images = req.processedImages && req.processedImages[i] ? req.processedImages[i] : [];
             if (images.length === 0) {
-                return res.status(400).json({ success: false, message: `At least one image required for variant ${i + 1}` });
+                return res.status(400).json({
+                    success: false,
+                    message: `At least one image is required for each variant (Variant ${i + 1})`
+                });
+            }
+            if (images.length > 5) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Maximum 5 images allowed per variant (Variant ${i + 1})`
+                });
             }
 
             const price = parseFloat(variantPrices[i]);
-            const salePrice = parseFloat(variantSalePrices[i]) || price; // Default to price if salePrice is undefined or invalid
-            if (isNaN(price)) {
+            const salePrice = parseFloat(variantSalePrices[i] || price);
+            const stock = parseInt(variantStocks[i]);
+            const colorName = variantNames[i] || '';
+            const color = variantColors[i] || '#000000';
+
+            if (!colorName) {
+                return res.status(400).json({ success: false, message: `Variant name is required for variant ${i + 1}` });
+            }
+            if (isNaN(price) || price <= 0) {
                 return res.status(400).json({ success: false, message: `Invalid price for variant ${i + 1}` });
             }
-            if (!isNaN(salePrice) && salePrice > price) {
-                return res.status(400).json({ success: false, message: `Sale price cannot exceed original price for variant ${i + 1}` });
+            if (isNaN(salePrice) || salePrice > price) {
+                return res.status(400).json({ success: false, message: `Sale price must be valid and not exceed original price for variant ${i + 1}` });
             }
 
             variants.push({
-                colorName: variantNames[i] || '',
-                color: variantColors[i] || '#000000',
-                price: price,
-                salePrice: isNaN(salePrice) ? price : salePrice, // Ensure salePrice is valid, default to price
-                stock: parseInt(variantStocks[i]) || 0,
+                colorName,
+                color,
+                price,
+                salePrice,
+                stock: isNaN(stock) ? 0 : stock,
                 productImages: images
             });
         }
-
-        console.log('📦 Variants to Save:', variants); // Debug log
 
         const newProduct = new Product({
             productName,
@@ -155,14 +132,18 @@ const addProduct = async (req, res) => {
             variants
         });
 
-        await newProduct.save();
-        res.json({ success: true, message: 'Product added successfully!', product: newProduct });
+        const savedProduct = await newProduct.save();
+        if (!savedProduct) return res.status(400).json({ success: false, message: 'Failed to add product' });
+
+        res.json({ success: true, message: 'Product added successfully', product: savedProduct });
     } catch (error) {
-        console.error('❌ Error adding product:', error);
+        // Logs the error for debugging purposes
+        console.error('Error in addProduct:', error);
         res.status(500).json({ success: false, message: error.message || 'Error adding product' });
     }
 };
 
+// Renders the page to edit an existing product
 const getEditProduct = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -173,17 +154,15 @@ const getEditProduct = async (req, res) => {
         const brands = await Brand.find({});
         res.render('admin/edit-product', { product, categories, brands });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error in getEditProduct:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 
+// Updates an existing product with new data and variants
 const updateProduct = async (req, res) => {
     try {
-        console.log("🟢 Update Product Route Hit! Product ID:", req.params.id);
-        console.log("📩 Raw Received Data (req.body):", req.body);
-        console.log("📸 Processed Images:", req.processedImages);
-
         const productId = req.params.id;
         const { productName, description, category, brand } = req.body;
 
@@ -194,64 +173,100 @@ const updateProduct = async (req, res) => {
         const variantNames = Array.isArray(req.body['variantName']) ? req.body['variantName'] : [req.body['variantName']];
         const variantColors = Array.isArray(req.body['variantColor']) ? req.body['variantColor'] : [req.body['variantColor']];
         const variantPrices = Array.isArray(req.body['variantPrice']) ? req.body['variantPrice'] : [req.body['variantPrice']];
-        const variantSalePrices = Array.isArray(req.body['variantSalePrice']) ? req.body['variantSalePrice'] : [req.body['variantSalePrice'] || []];
+        const variantSalePrices = Array.isArray(req.body['variantSalePrice']) ? req.body['variantSalePrice'] : [req.body['variantSalePrice']];
         const variantStocks = Array.isArray(req.body['variantStock']) ? req.body['variantStock'] : [req.body['variantStock']];
 
-        const maxLength = Math.max(
+        const formVariantCount = Math.max(
             variantNames.length,
             variantColors.length,
             variantPrices.length,
             variantSalePrices.length,
-            variantStocks.length,
-            existingProduct.variants.length
+            variantStocks.length
         );
 
-        for (let i = 0; i < maxLength; i++) {
+        // Validate images and data for each variant
+        for (let i = 0; i < formVariantCount; i++) {
             const existingVariant = existingProduct.variants[i] || {};
             const existingImages = existingVariant.productImages || [];
             const newImages = req.processedImages && req.processedImages[i] ? req.processedImages[i] : [];
             const allImages = [...existingImages, ...newImages].slice(0, 5);
 
+            if (allImages.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `At least one image is required for each variant (Variant ${i + 1})`
+                });
+            }
+            if (allImages.length > 5) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Maximum 5 images allowed per variant (Variant ${i + 1})`
+                });
+            }
+
             const price = parseFloat(variantPrices[i] || existingVariant.price || 0);
-            const salePrice = parseFloat(variantSalePrices[i]) || parseFloat(existingVariant.salePrice) || price; // Preserve existing salePrice or default to price
-            const stock = parseInt(variantStocks[i]) || existingVariant.stock || 0;
+            const salePrice = parseFloat(variantSalePrices[i] || existingVariant.salePrice || price);
+            const stockValue = parseInt(variantStocks[i]);
+            const stock = isNaN(stockValue) ? (existingVariant.stock || 0) : stockValue;
             const colorName = variantNames[i] || existingVariant.colorName || '';
             const color = variantColors[i] || existingVariant.color || '#000000';
 
-            if (isNaN(price)) {
+            if (!colorName) {
+                return res.status(400).json({ success: false, message: `Variant name is required for variant ${i + 1}` });
+            }
+            if (isNaN(price) || price <= 0) {
                 return res.status(400).json({ success: false, message: `Invalid price for variant ${i + 1}` });
             }
-            if (!isNaN(salePrice) && salePrice > price) {
-                return res.status(400).json({ success: false, message: `Sale price cannot exceed original price for variant ${i + 1}` });
+            if (isNaN(salePrice) || salePrice > price) {
+                return res.status(400).json({ success: false, message: `Sale price must be valid and not exceed original price for variant ${i + 1}` });
             }
 
             variants.push({
                 colorName,
                 color,
                 price,
-                salePrice: isNaN(salePrice) ? price : salePrice, // Ensure salePrice is valid
+                salePrice,
                 stock,
                 productImages: allImages
             });
         }
 
-        console.log('📦 Variants to Update:', variants); // Debug log
+        // Delete images from Cloudinary for removed variants
+        if (existingProduct.variants.length > formVariantCount) {
+            for (let i = formVariantCount; i < existingProduct.variants.length; i++) {
+                const variant = existingProduct.variants[i];
+                if (variant.productImages && variant.productImages.length > 0) {
+                    for (const imageUrl of variant.productImages) {
+                        const publicIdMatch = imageUrl.match(/\/products\/(.+)\.\w+$/);
+                        if (publicIdMatch) {
+                            const publicId = `products/${publicIdMatch[1]}`;
+                            await cloudinary.uploader.destroy(publicId).catch(err => {
+                                console.error(`Failed to delete image from Cloudinary: ${publicId}`, err);
+                            });
+                        }
+                    }
+                }
+            }
+        }
 
-        const updatedProduct = await Product.findByIdAndUpdate(
-            productId,
-            { productName, description, category, brand, variants, updatedAt: Date.now() },
-            { new: true }
-        );
+        existingProduct.productName = productName;
+        existingProduct.description = description;
+        existingProduct.category = category;
+        existingProduct.brand = brand;
+        existingProduct.variants = variants;
+        const updatedProduct = await existingProduct.save();
 
         if (!updatedProduct) return res.status(404).json({ success: false, message: 'Failed to update product' });
 
         res.json({ success: true, message: 'Product updated successfully', product: updatedProduct });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error in updateProduct:', error);
         res.status(500).json({ success: false, message: error.message || 'Error updating product' });
     }
 };
 
+// Deletes a product from the database
 const deleteProduct = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -259,11 +274,13 @@ const deleteProduct = async (req, res) => {
         if (!deletedProduct) return res.status(404).json({ success: false, message: 'Product not found' });
         res.json({ success: true, message: 'Product deleted successfully' });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error deleting product:', error);
         res.status(500).json({ success: false, message: 'Failed to delete product' });
     }
 };
 
+// Updates the block status of a product
 const updateProductStatus = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -272,11 +289,13 @@ const updateProductStatus = async (req, res) => {
         if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
         res.json({ success: true, message: 'Product status updated successfully' });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error updating product status:', error);
         res.status(500).json({ success: false, message: 'Failed to update product status' });
     }
 };
 
+// Deletes a specific image from a product variant
 const deleteVariantImage = async (req, res) => {
     try {
         const { productId, variantIndex, imageIndex } = req.params;
@@ -286,11 +305,22 @@ const deleteVariantImage = async (req, res) => {
         const variant = product.variants[variantIndex];
         if (!variant) return res.status(404).json({ success: false, message: 'Variant not found' });
 
+        const imageUrl = variant.productImages[parseInt(imageIndex)];
+        if (!imageUrl) return res.status(404).json({ success: false, message: 'Image not found' });
+
+        // Extract Cloudinary public ID from the URL
+        const publicIdMatch = imageUrl.match(/\/products\/(.+)\.\w+$/);
+        if (publicIdMatch) {
+            const publicId = `products/${publicIdMatch[1]}`;
+            await cloudinary.uploader.destroy(publicId);
+        }
+
         variant.productImages.splice(parseInt(imageIndex), 1);
         await product.save();
 
         res.json({ success: true, message: 'Image deleted successfully' });
     } catch (error) {
+        // Logs the error for debugging purposes
         console.error('Error deleting image:', error);
         res.status(500).json({ success: false, message: 'Failed to delete image' });
     }
@@ -300,7 +330,6 @@ module.exports = {
     getProducts,
     getAddProductPage,
     addProduct,
-    processImages,
     getEditProduct,
     updateProduct,
     deleteProduct,

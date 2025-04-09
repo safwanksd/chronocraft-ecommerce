@@ -4,7 +4,6 @@ const Cart = require('../models/cartSchema');
 const Wishlist = require('../models/wishlistSchema');
 
 const setHeaderCounts = async (req, res, next) => {
-    console.log('[COUNT-MIDDLEWARE] Fetching header counts for user:', req.session.user ? req.session.user._id : 'unauthenticated');
     try {
         let cartCount = 0;
         let wishlistCount = 0;
@@ -30,7 +29,6 @@ const setHeaderCounts = async (req, res, next) => {
                 const product = item.product;
                 return !product.isBlocked && product.category.isListed && !product.brand.isBlocked;
             }).length;
-            console.log('[COUNT-MIDDLEWARE] Wishlist count:', wishlistCount);
         }
 
         // Set counts in res.locals

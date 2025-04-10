@@ -1,20 +1,15 @@
-<!-- views/user/product-detail.ejs -->
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>
-        <%= product.productName %> | Watch Details
-    </title>
+    <title><%= product.productName %> | Watch Details</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/product-details.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -32,345 +27,324 @@
         }
     </style>
 </head>
-
 <body>
     <%- include('../partials/user/header.ejs') %>
 
-        <div class="container mt-4">
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/user/home">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/user/shop">Shop</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        <%= product.productName %>
-                    </li>
-                </ol>
-            </nav>
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/user/home">Home</a></li>
+                <li class="breadcrumb-item"><a href="/user/shop">Shop</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
+            </ol>
+        </nav>
 
-            <div class="row g-4">
-                <div class="col-md-7">
-                    <div class="image-zoom-container">
-                        <img id="mainImage" src="<%= product.variants[selectedVariantIndex].productImages[0] %>"
-                            class="img-fluid main-product-image" alt="<%= product.productName %>">
-                    </div>
-                    <div class="thumbnail-gallery mt-2 d-flex gap-2" id="thumbnailGallery">
-                        <% product.variants[selectedVariantIndex].productImages.forEach((image, index)=> { %>
-                            <img src="<%= image %>" class="thumbnail-image" onclick="changeImage('<%= image %>')"
-                                alt="Thumbnail <%= index + 1 %>">
-                            <% }); %>
-                    </div>
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="image-zoom-container">
+                    <img id="mainImage" src="<%= product.variants[selectedVariantIndex].productImages[0] %>" 
+                         class="img-fluid main-product-image" alt="<%= product.productName %>">
                 </div>
-
-                <div class="col-md-5 product-info">
-                    <h2 class="product-title">
-                        <%= product.productName %>
-                    </h2>
-                    <p class="text-muted mb-1">
-                        <%= product.brand.brandName %> | <%= product.category.name %>
-                    </p>
-                    <p class="rating mb-2">⭐⭐⭐⭐☆ (4.5/5, 120 Reviews)</p>
-                    <div id="variantPrice" class="price-container">
-                        <span class="sale-price">₹<%=
-                                product.variants[selectedVariantIndex].salePrice.toLocaleString('en-IN') %></span>
-                        <% if (product.variants[selectedVariantIndex].salePrice <
-                            product.variants[selectedVariantIndex].price) { %>
-                            <span class="original-price text-muted ms-2"><s>₹<%=
-                                        product.variants[selectedVariantIndex].price.toLocaleString('en-IN') %>
-                                        </s></span>
-                            <% } %>
-                                <!-- Removed the existing offer badge from here -->
-                    </div>
-
-                    <!-- New offer badge placement below price and above color variants -->
-                    <% if (product.variants[selectedVariantIndex].offerDiscount> 0) { %>
-                        <div class="mt-2">
-                            <span class="offer-badge">
-                                <%= product.variants[selectedVariantIndex].offerDiscount %>% OFF
-                            </span>
-                        </div>
-                        <% } %>
-
-                            <div class="color-variants my-3">
-                                <label class="form-label mb-1">Choose Color:</label>
-                                <div class="d-flex gap-2">
-                                    <% product.variants.forEach((variant, index)=> { %>
-                                        <div class="color-swatch <%= index === selectedVariantIndex ? 'active' : '' %>"
-                                            style="background-color: <%= variant.color %>;"
-                                            onclick="changeVariant(<%= index %>)" data-index="<%= index %>">
-                                        </div>
-                                        <% }); %>
-                                </div>
-                            </div>
-
-                            <p id="stockStatus"
-                                class="<%= product.variants[selectedVariantIndex].stock > 10 ? 'text-success' : product.variants[selectedVariantIndex].stock > 0 ? 'text-warning' : 'text-danger' %> mb-3">
-                                <%= product.variants[selectedVariantIndex].stock> 10 ? 'In Stock' :
-                                    product.variants[selectedVariantIndex].stock > 0 ? `Only
-                                    ${product.variants[selectedVariantIndex].stock} Left!` : 'Out of Stock' %>
-                            </p>
-
-                            <div class="d-flex gap-2 mb-3">
-                                <button id="cartActionBtn" class="btn btn-dark btn-custom"
-                                    data-product-id="<%= product._id %>"
-                                    data-variant-index="<%= selectedVariantIndex %>"
-                                    <%=product.variants[selectedVariantIndex].stock <=0 ? 'disabled' : '' %>>
-                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
-                                </button>
-                                <button class="btn btn-outline-dark btn-custom wishlist-btn">
-                                    <i class="far fa-heart me-2"></i>Wishlist
-                                </button>
-                            </div>
-
-                            <div>
-                                <button class="btn btn-outline-secondary w-100 desc-btn" onclick="toggleDescription()">
-                                    <i class="fas fa-info-circle me-2"></i>View Description
-                                </button>
-                                <p id="descriptionText" class="mt-2 d-none text-muted">
-                                    <%= product.description %>
-                                </p>
-                            </div>
+                <div class="thumbnail-gallery mt-2 d-flex gap-2" id="thumbnailGallery">
+                    <% product.variants[selectedVariantIndex].productImages.forEach((image, index) => { %>
+                        <img src="<%= image %>" 
+                             class="thumbnail-image" 
+                             onclick="changeImage('<%= image %>')" 
+                             alt="Thumbnail <%= index + 1 %>">
+                    <% }); %>
                 </div>
             </div>
 
-            <div class="related-products mt-5">
-                <h4 class="mb-3">You May Also Like</h4>
-                <div class="scrolling-wrapper d-flex gap-3">
-                    <% relatedProducts.forEach(related=> { %>
-                        <div class="related-product-card">
-                            <img src="<%= related.variants[0].productImages[0] %>" alt="<%= related.productName %>">
-                            <p class="fw-bold mb-1">
-                                <%= related.productName %>
-                            </p>
-                            <p class="price">
-                                ₹<%= related.variants[0].salePrice.toLocaleString('en-IN') %>
-                                    <% if (related.variants[0].salePrice < related.variants[0].price) { %>
-                                        <span class="original-price text-muted ms-2"><s>₹<%=
-                                                    related.variants[0].price.toLocaleString('en-IN') %></s></span>
-                                        <% } %>
-                                            <% if (related.variants[0].offerDiscount> 0) { %>
-                                                <span class="offer-badge">
-                                                    <%= related.variants[0].offerDiscount %>% OFF
-                                                </span>
-                                                <% } %>
-                            </p>
-                            <a href="/user/product-detail/<%= related._id %>"
-                                class="btn btn-sm btn-outline-dark">View</a>
-                        </div>
+            <div class="col-md-5 product-info">
+                <h2 class="product-title"><%= product.productName %></h2>
+                <p class="text-muted mb-1"><%= product.brand.brandName %> | <%= product.category.name %></p>
+                <p class="rating mb-2">⭐⭐⭐⭐☆ (4.5/5, 120 Reviews)</p>
+                <div id="variantPrice" class="price-container">
+                    <span class="sale-price">₹<%= product.variants[selectedVariantIndex].salePrice.toLocaleString('en-IN') %></span>
+                    <% if (product.variants[selectedVariantIndex].salePrice < product.variants[selectedVariantIndex].price) { %>
+                        <span class="original-price text-muted ms-2"><s>₹<%= product.variants[selectedVariantIndex].price.toLocaleString('en-IN') %></s></span>
+                    <% } %>
+                    <!-- Removed the existing offer badge from here -->
+                </div>
+
+                <!-- New offer badge placement below price and above color variants -->
+                <% if (product.variants[selectedVariantIndex].offerDiscount > 0) { %>
+                    <div class="mt-2">
+                        <span class="offer-badge"><%= product.variants[selectedVariantIndex].offerDiscount %>% OFF</span>
+                    </div>
+                <% } %>
+
+                <div class="color-variants my-3">
+                    <label class="form-label mb-1">Choose Color:</label>
+                    <div class="d-flex gap-2">
+                        <% product.variants.forEach((variant, index) => { %>
+                            <div class="color-swatch <%= index === selectedVariantIndex ? 'active' : '' %>" 
+                                 style="background-color: <%= variant.color %>;"
+                                 onclick="changeVariant(<%= index %>)" 
+                                 data-index="<%= index %>">
+                            </div>
                         <% }); %>
+                    </div>
+                </div>
+
+                <p id="stockStatus" class="<%= product.variants[selectedVariantIndex].stock > 10 ? 'text-success' : product.variants[selectedVariantIndex].stock > 0 ? 'text-warning' : 'text-danger' %> mb-3">
+                    <%= product.variants[selectedVariantIndex].stock > 10 ? 'In Stock' : product.variants[selectedVariantIndex].stock > 0 ? `Only ${product.variants[selectedVariantIndex].stock} Left!` : 'Out of Stock' %>
+                </p>
+
+                <div class="d-flex gap-2 mb-3">
+                    <button id="cartActionBtn" class="btn btn-dark btn-custom" 
+                            data-product-id="<%= product._id %>" 
+                            data-variant-index="<%= selectedVariantIndex %>"
+                            <%= product.variants[selectedVariantIndex].stock <= 0 ? 'disabled' : '' %>>
+                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                    </button>
+                    <button class="btn btn-outline-dark btn-custom wishlist-btn">
+                        <i class="far fa-heart me-2"></i>Wishlist
+                    </button>
+                </div>
+
+                <div>
+                    <button class="btn btn-outline-secondary w-100 desc-btn" onclick="toggleDescription()">
+                        <i class="fas fa-info-circle me-2"></i>View Description
+                    </button>
+                    <p id="descriptionText" class="mt-2 d-none text-muted"><%= product.description %></p>
                 </div>
             </div>
         </div>
 
-        <%- include('../partials/user/footer.ejs') %>
+        <div class="related-products mt-5">
+            <h4 class="mb-3">You May Also Like</h4>
+            <div class="scrolling-wrapper d-flex gap-3">
+                <% relatedProducts.forEach(related => { %>
+                    <div class="related-product-card">
+                        <img src="<%= related.variants[0].productImages[0] %>" 
+                             alt="<%= related.productName %>">
+                        <p class="fw-bold mb-1"><%= related.productName %></p>
+                        <p class="price">
+                            ₹<%= related.variants[0].salePrice.toLocaleString('en-IN') %>
+                            <% if (related.variants[0].salePrice < related.variants[0].price) { %>
+                                <span class="original-price text-muted ms-2"><s>₹<%= related.variants[0].price.toLocaleString('en-IN') %></s></span>
+                            <% } %>
+                            <% if (related.variants[0].offerDiscount > 0) { %>
+                                <span class="offer-badge"><%= related.variants[0].offerDiscount %>% OFF</span>
+                            <% } %>
+                        </p>
+                        <a href="/user/product-detail/<%= related._id %>" class="btn btn-sm btn-outline-dark">View</a>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
 
-            <script>
-                const allVariants = <% - JSON.stringify(product.variants) %>;
+    <%- include('../partials/user/footer.ejs') %>
 
-                function changeImage(imageUrl) {
-                    document.getElementById("mainImage").src = imageUrl;
-                }
+    <script>
+        const allVariants = <%- JSON.stringify(product.variants) %>;
 
-                function changeVariant(index) {
-                    const variant = allVariants[index];
-                    const mainImage = document.getElementById("mainImage");
-                    const thumbnailGallery = document.getElementById("thumbnailGallery");
-                    const stockStatus = document.getElementById("stockStatus");
-                    const variantPrice = document.getElementById("variantPrice");
-                    const cartActionBtn = document.getElementById("cartActionBtn");
+        function changeImage(imageUrl) {
+            document.getElementById("mainImage").src = imageUrl;
+        }
 
-                    // Update main image and thumbnails
-                    mainImage.src = variant.productImages[0];
-                    thumbnailGallery.innerHTML = variant.productImages.map((image, i) => `
+        function changeVariant(index) {
+    const variant = allVariants[index];
+    const mainImage = document.getElementById("mainImage");
+    const thumbnailGallery = document.getElementById("thumbnailGallery");
+    const stockStatus = document.getElementById("stockStatus");
+    const variantPrice = document.getElementById("variantPrice");
+    const cartActionBtn = document.getElementById("cartActionBtn");
+
+    // Update main image and thumbnails
+    mainImage.src = variant.productImages[0];
+    thumbnailGallery.innerHTML = variant.productImages.map((image, i) => `
         <img src="${image}" 
              class="thumbnail-image" 
              onclick="changeImage('${image}')" 
              alt="Thumbnail ${i + 1}">
     `).join('');
 
-                    // Update price and offer badge
-                    variantPrice.innerHTML = `
+    // Update price and offer badge
+    variantPrice.innerHTML = `
         <span class="sale-price">₹${(variant.salePrice || variant.price).toLocaleString('en-IN')}</span>
         ${(variant.salePrice || variant.price) < (variant.price || 0) ? `
             <span class="original-price text-muted ms-2"><s>₹${(variant.price || 0).toLocaleString('en-IN')}</s></span>
         ` : ''}
     `;
-                    // Add offer badge below price if applicable
-                    if (variant.offerDiscount && variant.offerDiscount > 0) {
-                        variantPrice.innerHTML += `
+    // Add offer badge below price if applicable
+    if (variant.offerDiscount && variant.offerDiscount > 0) {
+        variantPrice.innerHTML += `
             <div class="mt-2">
                 <span class="offer-badge">${variant.offerDiscount}% OFF</span>
             </div>
         `;
-                    }
+    }
 
-                    // Update stock status
-                    if (variant.stock > 10) {
-                        stockStatus.textContent = 'In Stock';
-                        stockStatus.className = 'text-success mb-3';
-                    } else if (variant.stock > 0) {
-                        stockStatus.textContent = `Only ${variant.stock} Left!`;
-                        stockStatus.className = 'text-warning mb-3';
-                    } else {
-                        stockStatus.textContent = 'Out of Stock';
-                        stockStatus.className = 'text-danger mb-3';
-                    }
+    // Update stock status
+    if (variant.stock > 10) {
+        stockStatus.textContent = 'In Stock';
+        stockStatus.className = 'text-success mb-3';
+    } else if (variant.stock > 0) {
+        stockStatus.textContent = `Only ${variant.stock} Left!`;
+        stockStatus.className = 'text-warning mb-3';
+    } else {
+        stockStatus.textContent = 'Out of Stock';
+        stockStatus.className = 'text-danger mb-3';
+    }
 
-                    // Update button attributes
-                    cartActionBtn.setAttribute('data-variant-index', index);
+    // Update button attributes
+    cartActionBtn.setAttribute('data-variant-index', index);
 
-                    // Check if the product variant is in the cart using AJAX
-                    fetch(`/user/cart/check?productId=<%= product._id %>&variantIndex=${index}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Update button text based on cart status
-                            const isInCart = data.isInCart;
-                            cartActionBtn.innerHTML = `
+    // Check if the product variant is in the cart using AJAX
+    fetch(`/user/cart/check?productId=<%= product._id %>&variantIndex=${index}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update button text based on cart status
+        const isInCart = data.isInCart;
+        cartActionBtn.innerHTML = `
             <i class="fas fa-cart-plus me-2"></i>
             ${isInCart ? 'Go to Cart' : 'Add to Cart'}
         `;
-                            // Disable the button if the variant is out of stock
-                            cartActionBtn.disabled = variant.stock <= 0;
-                        })
-                        .catch(error => {
-                            console.error('[PRODUCT-DETAIL] Error checking cart status:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Unable to check cart status. Please try again.'
-                            });
-                            // Fallback: assume not in cart and disable if out of stock
-                            cartActionBtn.innerHTML = `
+        // Disable the button if the variant is out of stock
+        cartActionBtn.disabled = variant.stock <= 0;
+    })
+    .catch(error => {
+        console.error('[PRODUCT-DETAIL] Error checking cart status:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Unable to check cart status. Please try again.'
+        });
+        // Fallback: assume not in cart and disable if out of stock
+        cartActionBtn.innerHTML = `
             <i class="fas fa-cart-plus me-2"></i>Add to Cart
         `;
-                            cartActionBtn.disabled = variant.stock <= 0;
-                        });
+        cartActionBtn.disabled = variant.stock <= 0;
+    });
 
-                    // Update active color swatch
-                    document.querySelectorAll('.color-swatch').forEach(swatch => swatch.classList.remove('active'));
-                    document.querySelector(`.color-swatch[data-index="${index}"]`).classList.add('active');
-                }
+    // Update active color swatch
+    document.querySelectorAll('.color-swatch').forEach(swatch => swatch.classList.remove('active'));
+    document.querySelector(`.color-swatch[data-index="${index}"]`).classList.add('active');
+}
 
-                function toggleDescription() {
-                    document.getElementById("descriptionText").classList.toggle("d-none");
-                }
+        function toggleDescription() {
+            document.getElementById("descriptionText").classList.toggle("d-none");
+        }
 
-                document.getElementById('cartActionBtn').addEventListener('click', async function (e) {
-                    e.preventDefault();
-                    if (this.disabled) return;
+        document.getElementById('cartActionBtn').addEventListener('click', async function(e) {
+    e.preventDefault();
+    if (this.disabled) return;
 
-                    const isGoToCart = this.textContent.trim() === 'Go to Cart';
-                    if (isGoToCart) {
-                        window.location.href = '/user/cart';
-                        return;
-                    }
+    const isGoToCart = this.textContent.trim() === 'Go to Cart';
+    if (isGoToCart) {
+        window.location.href = '/user/cart';
+        return;
+    }
 
-                    const productId = this.getAttribute('data-product-id');
-                    const variantIndex = parseInt(this.getAttribute('data-variant-index'));
+    const productId = this.getAttribute('data-product-id');
+    const variantIndex = parseInt(this.getAttribute('data-variant-index'));
 
-                    try {
-                        const response = await fetch('/user/cart/add', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ productId, variantIndex })
-                        });
+    try {
+        const response = await fetch('/user/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, variantIndex })
+        });
 
-                        const data = await response.json();
-                        if (data.success) {
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: 'Product added to the cart',
-                                showConfirmButton: false,
-                                timer: 2000
-                            });
-                            this.innerHTML = '<i class="fas fa-cart-plus me-2"></i>Go to Cart';
-                            this.disabled = false; // Ensure the button remains clickable
+        const data = await response.json();
+        if (data.success) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Product added to the cart',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            this.innerHTML = '<i class="fas fa-cart-plus me-2"></i>Go to Cart';
+            this.disabled = false; // Ensure the button remains clickable
 
-                            // Dispatch custom event to update header counts
-                            document.dispatchEvent(new Event('cartUpdated'));
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: data.message
-                            });
-                        }
-                    } catch (error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred. Please try again.'
-                        });
-                    }
-                });
+            // Dispatch custom event to update header counts
+            document.dispatchEvent(new Event('cartUpdated'));
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again.'
+        });
+    }
+});
 
-                document.querySelector('.wishlist-btn').addEventListener('click', async function (e) {
-                    e.preventDefault();
+document.querySelector('.wishlist-btn').addEventListener('click', async function(e) {
+    e.preventDefault();
 
-                    const productId = document.getElementById('cartActionBtn').getAttribute('data-product-id');
-                    const variantIndex = parseInt(document.getElementById('cartActionBtn').getAttribute('data-variant-index'));
+    const productId = document.getElementById('cartActionBtn').getAttribute('data-product-id');
+    const variantIndex = parseInt(document.getElementById('cartActionBtn').getAttribute('data-variant-index'));
 
-                    try {
-                        const response = await fetch('/user/wishlist/add', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ productId, variantIndex })
-                        });
+    try {
+        const response = await fetch('/user/wishlist/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, variantIndex })
+        });
 
-                        const data = await response.json();
-                        if (data.success) {
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: 'Product added to wishlist',
-                                showConfirmButton: false,
-                                timer: 2000
-                            });
+        const data = await response.json();
+        if (data.success) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Product added to wishlist',
+                showConfirmButton: false,
+                timer: 2000
+            });
 
-                            // Dispatch custom event to update header counts
-                            document.dispatchEvent(new Event('wishlistUpdated'));
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: data.message
-                            });
-                        }
-                    } catch (error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred. Please try again.'
-                        });
-                    }
-                });
-                document.addEventListener('DOMContentLoaded', function () {
-                    const container = document.querySelector('.image-zoom-container');
-                    const img = container.querySelector('.main-product-image');
+            // Dispatch custom event to update header counts
+            document.dispatchEvent(new Event('wishlistUpdated'));
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again.'
+        });
+    }
+});
+       document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.image-zoom-container');
+    const img = container.querySelector('.main-product-image');
 
-                    container.addEventListener('mousemove', function (e) {
-                        const rect = container.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        const xPercent = (x / rect.width) * 100;
-                        const yPercent = (y / rect.height) * 100;
-                        img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-                        img.style.transform = 'scale(2)';
-                    });
+    container.addEventListener('mousemove', function(e) {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+        img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+        img.style.transform = 'scale(2)';
+    });
 
-                    container.addEventListener('mouseleave', function () {
-                        img.style.transform = 'scale(1)';
-                    });
+    container.addEventListener('mouseleave', function() {
+        img.style.transform = 'scale(1)';
+    });
 
-                    // Initialize variant selection and update button state
-                    changeVariant(<%= selectedVariantIndex %>);
-                });
-            </script>
+    // Initialize variant selection and update button state
+    changeVariant(<%= selectedVariantIndex %>);
+});
+   </script>
 </body>
-
 </html>

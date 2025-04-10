@@ -47,6 +47,7 @@ const blockUser = async (req, res) => {
         }
 
         user.isBlocked = true;
+        console.log("User before save:", user);
         await user.save();
 
         return res.json({ success: true, message: "User blocked successfully" });
@@ -68,6 +69,7 @@ const unblockUser = async (req, res) => {
         }
 
         user.isBlocked = false;
+        console.log("User before save:", user);
         await user.save();
 
         return res.json({ success: true, message: "User unblocked successfully" });

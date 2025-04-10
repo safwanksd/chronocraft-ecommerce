@@ -645,7 +645,6 @@ const getDashboardStats = async (req, res) => {
         const today = new Date();
         let startDate, endDate;
 
-        // Sets the date range based on the selected timeframe
         switch (timeframe.toLowerCase()) {
             case 'daily':
                 startDate = new Date(today.setHours(0, 0, 0, 0));
@@ -669,7 +668,6 @@ const getDashboardStats = async (req, res) => {
                 break;
         }
 
-        // Fetches overall statistics for the dashboard cards
         const totalOrders = await Order.countDocuments({
             createdAt: { $gte: startDate, $lte: endDate },
             orderStatus: { $in: ['Delivered', 'Completed'] }
@@ -709,7 +707,6 @@ const getDashboardStats = async (req, res) => {
 
         const totalUsers = await User.countDocuments();
 
-        // Fetches revenue and orders data for the line chart
         let format;
         if (timeframe === 'daily') {
             format = '%Y-%m-%d %H:%M';
@@ -742,7 +739,6 @@ const getDashboardStats = async (req, res) => {
             revenue: salesData.map(data => data.totalRevenue)
         };
 
-        // Fetches top selling products for the donut chart
         const topProductsData = await Order.aggregate([
             {
                 $match: {
@@ -781,7 +777,6 @@ const getDashboardStats = async (req, res) => {
             values: topProductsData.length > 0 ? topProductsData.map(data => data.totalSold) : [0]
         };
 
-        // Fetches top selling categories for the donut chart
         const topCategoriesData = await Order.aggregate([
             {
                 $match: {
@@ -829,7 +824,6 @@ const getDashboardStats = async (req, res) => {
             values: topCategoriesData.length > 0 ? topCategoriesData.map(data => data.totalSold) : [0]
         };
 
-        // Fetches top selling brands for the donut chart
         const topBrandsData = await Order.aggregate([
             {
                 $match: {
@@ -876,7 +870,6 @@ const getDashboardStats = async (req, res) => {
             labels: topBrandsData.length > 0 ? topBrandsData.map(data => data.brandName) : ['No Data'],
             values: topBrandsData.length > 0 ? topBrandsData.map(data => data.totalSold) : [0]
         };
-
         res.render('admin/dashboard', {
             totalOrders,
             totalRevenue,
@@ -886,12 +879,11 @@ const getDashboardStats = async (req, res) => {
             topProductsChartData,
             topCategoriesChartData,
             topBrandsChartData,
-            timeframe
+            timeframe,
+            error: null // Default to null when no error
         });
     } catch (error) {
-        // Logs the error for debugging purposes
         console.error('Error fetching dashboard stats:', error);
-        // Handles errors by rendering the dashboard with default values and an error message
         res.status(500).render('admin/dashboard', {
             totalOrders: 0,
             totalRevenue: 0,
@@ -906,7 +898,6 @@ const getDashboardStats = async (req, res) => {
         });
     }
 };
-
 module.exports = {
     getOrders,
     updateOrderStatus,

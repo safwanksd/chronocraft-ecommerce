@@ -1,5 +1,3 @@
-<!-- views/admin/dashboard.ejs -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,274 +25,337 @@
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 400px; /* Minimum height */
+            max-height: 500px; /* Maximum height to prevent infinite stretching */
+            overflow-y: auto; /* Add scrollbar if content exceeds max-height */
+        }
+
+        /* Ensure canvas respects container height */
+        .chart-container canvas {
+            max-height: 100%;
+            height: auto !important;
         }
     </style>
 </head>
 
 <body>
     <%- include('../partials/admin/header.ejs') %>
-        <%- include('../partials/admin/sidebar.ejs') %>
+    <%- include('../partials/admin/sidebar.ejs') %>
 
-            <div class="content">
-                <h2 class="mb-4">Dashboard</h2>
+    <div class="content">
+        <h2 class="mb-4">Dashboard</h2>
 
-                <!-- Timeframe Filter -->
-                <div class="mb-4">
-                    <select id="timeframeFilter" class="form-select w-auto d-inline-block" onchange="updateDashboard()">
-                        <option value="daily" <%=(typeof timeframe !=='undefined' && timeframe==='daily' ) ? 'selected'
-                            : '' %>>Daily</option>
-                        <option value="weekly" <%=(typeof timeframe !=='undefined' && timeframe==='weekly' )
-                            ? 'selected' : '' %>>Weekly</option>
-                        <option value="monthly" <%=(typeof timeframe !=='undefined' && timeframe==='monthly' )
-                            ? 'selected' : '' %>>Monthly</option>
-                        <option value="yearly" <%=(typeof timeframe !=='undefined' && timeframe==='yearly' )
-                            ? 'selected' : '' %>>Yearly</option>
-                    </select>
+        <!-- Timeframe Filter -->
+        <div class="mb-4">
+            <select id="timeframeFilter" class="form-select w-auto d-inline-block" onchange="updateDashboard()">
+                <option value="daily" <%=(typeof timeframe !== 'undefined' && timeframe === 'daily') ? 'selected' : '' %>>Daily</option>
+                <option value="weekly" <%=(typeof timeframe !== 'undefined' && timeframe === 'weekly') ? 'selected' : '' %>>Weekly</option>
+                <option value="monthly" <%=(typeof timeframe !== 'undefined' && timeframe === 'monthly') ? 'selected' : '' %>>Monthly</option>
+                <option value="yearly" <%=(typeof timeframe !== 'undefined' && timeframe === 'yearly') ? 'selected' : '' %>>Yearly</option>
+            </select>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center p-3">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h4>Total Orders</h4>
+                    <p class="fs-3"><%= totalOrders || 0 %></p>
                 </div>
-
-                <!-- Summary Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card text-center p-3">
-                            <i class="fas fa-shopping-cart"></i>
-                            <h4>Total Orders</h4>
-                            <p class="fs-3">
-                                <%= totalOrders || 0 %>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center p-3">
-                            <i class="fas fa-chart-line"></i>
-                            <h4>Total Revenue</h4>
-                            <p class="fs-3">₹<%= totalRevenue ? totalRevenue.toLocaleString('en-IN', {
-                                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center p-3">
-                            <i class="fas fa-box"></i>
-                            <h4>Products Sold</h4>
-                            <p class="fs-3">
-                                <%= totalProductsSold || 0 %>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center p-3">
-                            <i class="fas fa-users"></i>
-                            <h4>Total Users</h4>
-                            <p class="fs-3">
-                                <%= totalUsers || 0 %>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <div class="chart-container">
-                            <h5>Revenue and Orders Over Time</h5>
-                            <canvas id="lineChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="chart-container">
-                            <h5>Top Selling Products</h5>
-                            <canvas id="topProductsChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="chart-container">
-                            <h5>Top Selling Categories</h5>
-                            <canvas id="topCategoriesChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="chart-container">
-                            <h5>Top Selling Brands</h5>
-                            <canvas id="topBrandsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- No Data Message -->
-                <% if (lineChartData.labels.length===0) { %>
-                    <div class="alert alert-info mt-4" role="alert">
-                        No sales data available for the selected period.
-                    </div>
-                    <% } %>
             </div>
+            <div class="col-md-3">
+                <div class="card text-center p-3">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Total Revenue</h4>
+                    <p class="fs-3">₹<%= totalRevenue ? totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center p-3">
+                    <i class="fas fa-box"></i>
+                    <h4>Products Sold</h4>
+                    <p class="fs-3"><%= totalProductsSold || 0 %></p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center p-3">
+                    <i class="fas fa-users"></i>
+                    <h4>Total Users</h4>
+                    <p class="fs-3"><%= totalUsers || 0 %></p>
+                </div>
+            </div>
+        </div>
 
-            <!-- JavaScript for Charts -->
-            <script>
-                // Line Chart (Revenue and Orders Over Time)
-                const lineChartCtx = document.getElementById('lineChart').getContext('2d');
-                new Chart(lineChartCtx, {
-                    type: 'line', // Always use line chart
-                    data: {
-                        labels: <% - JSON.stringify(lineChartData?.labels || []) %>,
-                        datasets: [
-                            {
-                                label: 'Revenue (₹)',
-                                data: <% - JSON.stringify(lineChartData?.revenue || []) %>,
-                                borderColor: '#36A2EB',
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                borderWidth: 2,
-                                pointRadius: 5,
-                                pointBackgroundColor: '#36A2EB',
-                                pointBorderColor: '#36A2EB',
-                                pointHoverRadius: 7,
-                                yAxisID: 'y',
-                                fill: false
-                            },
-                            {
-                                label: 'Orders',
-                                data: <% - JSON.stringify(lineChartData?.orders || []) %>,
-                                borderColor: '#FF6384',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                borderWidth: 2,
-                                pointRadius: 5,
-                                pointBackgroundColor: '#FF6384',
-                                pointBorderColor: '#FF6384',
-                                pointHoverRadius: 7,
-                                yAxisID: 'y1',
-                                fill: false
-                            }
-                        ]
+        <!-- Charts -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="chart-container">
+                    <h5>Revenue and Orders Over Time</h5>
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="chart-container">
+                    <h5>Top Selling Products</h5>
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container">
+                    <h5>Top Selling Categories</h5>
+                    <canvas id="topCategoriesChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container">
+                    <h5>Top Selling Brands</h5>
+                    <canvas id="topBrandsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Data Message -->
+        <% if (lineChartData.labels.length === 0) { %>
+            <div class="alert alert-info mt-4" role="alert">
+                No sales data available for the selected period.
+            </div>
+            <% } %>
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger mt-4" role="alert">
+                <%= error %>
+            </div>
+            <% } %>
+    </div>
+
+    <!-- JavaScript for Charts -->
+    <script>
+        // Line Chart (Revenue and Orders Over Time)
+        const lineChartCtx = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(lineChartCtx, {
+            type: 'line',
+            data: {
+                labels: <%- JSON.stringify(lineChartData?.labels || []) %>,
+                datasets: [
+                    {
+                        label: 'Revenue (₹)',
+                        data: <%- JSON.stringify(lineChartData?.revenue || []) %>,
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#36A2EB',
+                        pointBorderColor: '#36A2EB',
+                        pointHoverRadius: 7,
+                        yAxisID: 'y',
+                        fill: false
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.dataset.label === 'Revenue (₹)') {
-                                            label += '₹' + context.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                        } else {
-                                            label += context.parsed.y;
-                                        }
-                                        return label;
-                                    }
+                    {
+                        label: 'Orders',
+                        data: <%- JSON.stringify(lineChartData?.orders || []) %>,
+                        borderColor: '#FF6384',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#FF6384',
+                        pointBorderColor: '#FF6384',
+                        pointHoverRadius: 7,
+                        yAxisID: 'y1',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Allow custom sizing
+                aspectRatio: 2, // Adjust aspect ratio to control height
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
                                 }
+                                if (context.dataset.label === 'Revenue (₹)') {
+                                    label += '₹' + context.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                } else {
+                                    label += context.parsed.y;
+                                }
+                                return label;
                             }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Revenue (₹)'
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                position: 'left',
-                                title: {
-                                    display: true,
-                                    text: 'Revenue (₹)'
-                                },
-                                ticks: {
-                                    callback: function (value) {
-                                        return '₹' + value.toLocaleString('en-IN');
-                                    }
-                                }
-                            },
-                            y1: {
-                                beginAtZero: true,
-                                position: 'right',
-                                title: {
-                                    display: true,
-                                    text: 'Number of Orders'
-                                },
-                                grid: {
-                                    drawOnChartArea: false
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Time'
-                                }
+                        ticks: {
+                            callback: function (value) {
+                                return '₹' + value.toLocaleString('en-IN');
                             }
                         }
-                    }
-                });
-
-                // Donut Chart (Top Selling Products)
-                const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
-                new Chart(topProductsCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: <% - JSON.stringify(topProductsChartData?.labels || []) %>,
-                        datasets: [{
-                            data: <% - JSON.stringify(topProductsChartData?.values || []) %>,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                        }]
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right'
-                            }
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Number of Orders'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            stepSize: 1
                         }
-                    }
-                });
-
-                // Donut Chart (Top Selling Categories)
-                const topCategoriesCtx = document.getElementById('topCategoriesChart').getContext('2d');
-                new Chart(topCategoriesCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: <% - JSON.stringify(topCategoriesChartData?.labels || []) %>,
-                        datasets: [{
-                            data: <% - JSON.stringify(topCategoriesChartData?.values || []) %>,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                        }]
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right'
-                            }
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
                         }
                     }
-                });
-
-                // Donut Chart (Top Selling Brands)
-                const topBrandsCtx = document.getElementById('topBrandsChart').getContext('2d');
-                new Chart(topBrandsCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: <% - JSON.stringify(topBrandsChartData?.labels || []) %>,
-                        datasets: [{
-                            data: <% - JSON.stringify(topBrandsChartData?.values || []) %>,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right'
-                            }
-                        }
-                    }
-                });
-
-                // Update Dashboard on Timeframe Change
-                function updateDashboard() {
-                    const timeframe = document.getElementById('timeframeFilter').value;
-                    window.location.href = `/admin/dashboard?timeframe=${timeframe}`;
                 }
-            </script>
+            }
+        });
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        // Donut Chart (Top Selling Products)
+        const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+        const topProductsChart = new Chart(topProductsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <%- JSON.stringify(topProductsChartData?.labels || []) %>,
+                datasets: [{
+                    data: <%- JSON.stringify(topProductsChartData?.values || []) %>,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.toLocaleString();
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Donut Chart (Top Selling Categories)
+        const topCategoriesCtx = document.getElementById('topCategoriesChart').getContext('2d');
+        const topCategoriesChart = new Chart(topCategoriesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <%- JSON.stringify(topCategoriesChartData?.labels || []) %>,
+                datasets: [{
+                    data: <%- JSON.stringify(topCategoriesChartData?.values || []) %>,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.toLocaleString();
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Donut Chart (Top Selling Brands)
+        const topBrandsCtx = document.getElementById('topBrandsChart').getContext('2d');
+        const topBrandsChart = new Chart(topBrandsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <%- JSON.stringify(topBrandsChartData?.labels || []) %>,
+                datasets: [{
+                    data: <%- JSON.stringify(topBrandsChartData?.values || []) %>,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.toLocaleString();
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update Dashboard on Timeframe Change
+        function updateDashboard() {
+            const timeframe = document.getElementById('timeframeFilter').value;
+            window.location.href = `/admin/dashboard?timeframe=${timeframe}`;
+        }
+
+        // Destroy charts on page unload to prevent memory leaks
+        window.onbeforeunload = function () {
+            lineChart.destroy();
+            topProductsChart.destroy();
+            topCategoriesChart.destroy();
+            topBrandsChart.destroy();
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

@@ -133,7 +133,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch(`/admin/users/${isBlocked ? 'unblock' : 'block'}/${userId}`, {
-                                method: 'POST'
+                                method: 'PATCH'
                             })
                                 .then(response => response.json())
                                 .then(data => {

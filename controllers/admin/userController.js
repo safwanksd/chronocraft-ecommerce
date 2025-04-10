@@ -40,43 +40,46 @@ const getUsers = async (req, res) => {
 const blockUser = async (req, res) => {
     try {
         const userId = req.params.id;
+        console.log("Attempting to block user with ID:", userId);
 
         const user = await User.findById(userId);
         if (!user) {
+            console.log("User not found with ID:", userId);
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
+        console.log("User found, isBlocked before:", user.isBlocked);
         user.isBlocked = true;
-        console.log("User before save:", user);
         await user.save();
+        console.log("User blocked, isBlocked after:", user.isBlocked);
 
         return res.json({ success: true, message: "User blocked successfully" });
     } catch (error) {
-        // Logs the error for debugging purposes
-        console.error("Error blocking user:", error);
-        return res.status(500).json({ success: false, message: "Failed to update user status" });
+        console.error("Error blocking user:", error.message, error.stack);
+        return res.status(500).json({ success: false, message: "Failed to update user status: " + error.message });
     }
 };
 
-// Unblocks a user by setting their isBlocked status to false
 const unblockUser = async (req, res) => {
     try {
         const userId = req.params.id;
+        console.log("Attempting to unblock user with ID:", userId);
 
         const user = await User.findById(userId);
         if (!user) {
+            console.log("User not found with ID:", userId);
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
+        console.log("User found, isBlocked before:", user.isBlocked);
         user.isBlocked = false;
-        console.log("User before save:", user);
         await user.save();
+        console.log("User unblocked, isBlocked after:", user.isBlocked);
 
         return res.json({ success: true, message: "User unblocked successfully" });
     } catch (error) {
-        // Logs the error for debugging purposes
-        console.error("Error unblocking user:", error);
-        return res.status(500).json({ success: false, message: "Failed to update user status" });
+        console.error("Error unblocking user:", error.message, error.stack);
+        return res.status(500).json({ success: false, message: "Failed to update user status: " + error.message });
     }
 };
 

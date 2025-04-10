@@ -59,6 +59,11 @@ app.get('/', async (req, res) => {
 app.use('/user', userRouter);
 app.use('/admin', adminRouter);
 
+app.get('/admin/test', (req, res) => {
+    console.log("Admin test route hit");
+    res.send("Admin test route working");
+});
+
 // Set EJS as the view engine and configure views directory
 app.set('view engine', 'ejs');
 app.set('views', [path.join(__dirname, 'views')]);

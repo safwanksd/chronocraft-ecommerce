@@ -1,5 +1,3 @@
-<!-- views/user/wallet.ejs -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,181 +15,198 @@
 <body>
     <%- include('../partials/user/header') %>
 
-        <div class="container-fluid profile-container mt-5 py-5">
-            <div class="row">
-                <!-- Left Sidebar -->
-                <div class="col-lg-3 col-md-4 sidebar">
-                    <div class="profile-sidebar text-center">
-                        <a href="/user/profile/edit" class="btn btn-black mb-4">Profile Edit</a>
-                        <ul class="nav flex-column sidebar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link" href="/user/profile">Account Overview</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/user/orders">My Orders</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/user/profile/addresses">Manage Address</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" href="/user/wallet">Wallet</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/user/profile/change-password">Manage Password</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link logout-btn" href="/user/logout">LOG OUT</a>
-                            </li>
-                        </ul>
-                    </div>
+    <div class="container-fluid profile-container mt-5 py-5">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-lg-3 col-md-4 sidebar">
+                <div class="profile-sidebar text-center">
+                    <a href="/user/profile/edit" class="btn btn-black mb-4">Profile Edit</a>
+                    <ul class="nav flex-column sidebar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile">Account Overview</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/orders">My Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile/addresses">Manage Address</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/user/wallet">Wallet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/profile/change-password">Manage Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link logout-btn" href="/user/logout">LOG OUT</a>
+                        </li>
+                    </ul>
                 </div>
+            </div>
 
-                <!-- Main Content -->
-                <div class="col-lg-9 col-md-8 main-content">
-                    <h2 class="text-center mb-5 text-black text-shadow">My Wallet</h2>
-                    <div class="profile-details card p-4">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="wallet-balance mb-4"
-                                    style="background-color: #ff6200; color: white; padding: 1rem; border-radius: 10px; text-align: center;">
-                                    <h4>Available Balance</h4>
-                                    <h3>₹<%= wallet.balance.toLocaleString('en-IN') %>
-                                    </h3>
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8 main-content">
+                <h2 class="text-center mb-5 text-black text-shadow">My Wallet</h2>
+                <div class="profile-details card p-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="wallet-balance mb-4"
+                                style="background-color: #323338; color: white; padding: 1rem; border-radius: 10px; text-align: center;">
+                                <h4>Available Balance</h4>
+                                <h3>₹<%= wallet.balance.toLocaleString('en-IN') %>
+                                </h3>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-4 text-center">
+                                    <p><strong>Total Added</strong></p>
+                                    <p>₹<%= totalAdded.toLocaleString('en-IN') %>
+                                    </p>
                                 </div>
-                                <div class="row mb-4">
-                                    <div class="col-4 text-center">
-                                        <p><strong>Total Added</strong></p>
-                                        <p>₹<%= totalAdded.toLocaleString('en-IN') %>
-                                        </p>
-                                    </div>
-                                    <div class="col-4 text-center">
-                                        <p><strong>Total Spent</strong></p>
-                                        <p>₹<%= totalSpent.toLocaleString('en-IN') %>
-                                        </p>
-                                    </div>
-                                    <div class="col-4 text-center">
-                                        <p><strong>Transactions</strong></p>
+                                <div class="col-4 text-center">
+                                    <p><strong>Total Spent</strong></p>
+                                    <p>₹<%= totalSpent.toLocaleString('en-IN') %>
+                                    </p>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <p><strong>Transactions</strong></p>
+                                    <p>
+                                        <%= transactionCount %>
+                                    </p>
+                                </div>
+                            </div>
+                            <form id="addMoneyForm" class="mb-4" method="POST" action="/user/wallet/add-money">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="amount" placeholder="Enter amount to add" id="amountInput">
+                                    <button type="submit" class="btn btn-warning" style="background-color: #323338; color: white;">Add Money</button>
+                                </div>
+                            </form>
+                            <a href="/user/wallet/transactions" class="btn btn-outline-dark mb-3">Transaction
+                                History</a>
+                            <div class="recent-transactions">
+                                <h5>Recent Transactions</h5>
+                                <% if (wallet.transactions.length > 0) { %>
+                                    <% wallet.transactions.slice(-3).reverse().forEach(transaction => { %>
                                         <p>
-                                            <%= transactionCount %>
+                                            <%= transaction.date.toLocaleString('en-IN') %> - <%= transaction.type %>: ₹<%= transaction.amount.toLocaleString('en-IN') %> (<%=
+                                                    transaction.status %>)
                                         </p>
-                                    </div>
-                                </div>
-                                <form id="addMoneyForm" class="mb-4" method="POST" action="/user/wallet/add-money">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" name="amount"
-                                            placeholder="Enter amount to add" min="1" required>
-                                        <button type="submit" class="btn btn-warning"
-                                            style="background-color: #ff6200; color: white;">Add Money</button>
-                                    </div>
-                                </form>
-                                <a href="/user/wallet/transactions" class="btn btn-outline-dark mb-3">Transaction
-                                    History</a>
-                                <div class="recent-transactions">
-                                    <h5>Recent Transactions</h5>
-                                    <% if (wallet.transactions.length> 0) { %>
-                                        <% wallet.transactions.slice(-3).reverse().forEach(transaction=> { %>
-                                            <p>
-                                                <%= transaction.date.toLocaleString('en-IN') %> - <%= transaction.type
-                                                        %>: ₹<%= transaction.amount.toLocaleString('en-IN') %> (<%=
-                                                                transaction.status %>)
-                                            </p>
-                                            <% }); %>
-                                                <% } else { %>
-                                                    <p>No recent transactions.</p>
-                                                    <% } %>
-                                </div>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <p>No recent transactions.</p>
+                                                <% } %>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <%- include('../partials/user/footer.ejs') %>
+    <%- include('../partials/user/footer.ejs') %>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    console.log("🟢 Wallet Page Loaded!");
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("🟢 Wallet Page Loaded!");
 
-                    // Define Toast mixin for notifications
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer);
-                            toast.addEventListener('mouseleave', Swal.resumeTimer);
-                        }
+            // Define Toast mixin for notifications
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
+            // Inline validation and form submission with AJAX
+            document.getElementById('addMoneyForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const amountInput = document.getElementById('amountInput');
+                const amount = amountInput.value;
+
+                // Inline validation
+                if (!amount || amount.trim() === '') {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please enter an amount.'
+                    });
+                    amountInput.focus();
+                    return;
+                }
+
+                if (isNaN(amount) || parseFloat(amount) <= 0) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please enter a valid amount greater than 0.'
+                    });
+                    amountInput.focus();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/user/wallet/add-money', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: parseFloat(amount) })
                     });
 
-                    // Handle form submission with AJAX
-                    document.getElementById('addMoneyForm').addEventListener('submit', async function (e) {
-                        e.preventDefault();
-                        const amount = document.querySelector('input[name="amount"]').value;
-
-                        try {
-                            const response = await fetch('/user/wallet/add-money', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ amount })
-                            });
-
-                            const data = await response.json();
-                            if (data.success) {
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: data.message
-                                }).then(() => {
-                                    location.reload(); // Refresh to update balance
-                                });
-                            } else {
-                                Toast.fire({
-                                    icon: 'error',
-                                    title: data.message
-                                });
-                            }
-                        } catch (error) {
-                            Toast.fire({
-                                icon: 'error',
-                                title: 'An error occurred while adding money. Please try again.'
-                            });
-                            console.error('Error adding money to wallet:', error);
-                        }
+                    const data = await response.json();
+                    if (data.success) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: data.message
+                        }).then(() => {
+                            location.reload(); // Refresh to update balance
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: 'error',
+                            title: data.message
+                        });
+                    }
+                } catch (error) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'An error occurred while adding money. Please try again.'
                     });
+                    console.error('Error adding money to wallet:', error);
+                }
+            });
 
-                    // Logout functionality with toast
-                    document.querySelector(".logout-btn").addEventListener("click", async function (event) {
-                        event.preventDefault();
-                        try {
-                            const response = await fetch("/user/logout");
-                            const data = await response.json();
-                            if (data.success) {
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: 'Logged out successfully'
-                                }).then(() => {
-                                    window.location.href = data.redirectUrl;
-                                });
-                            } else {
-                                Toast.fire({
-                                    icon: 'error',
-                                    title: data.message || 'Logout failed'
-                                });
-                            }
-                        } catch (error) {
-                            Toast.fire({
-                                icon: 'error',
-                                title: 'An error occurred during logout'
-                            });
-                            console.error("Logout failed:", error);
-                        }
+            // Logout functionality with toast
+            document.querySelector(".logout-btn").addEventListener("click", async function (event) {
+                event.preventDefault();
+                try {
+                    const response = await fetch("/user/logout");
+                    const data = await response.json();
+                    if (data.success) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Logged out successfully'
+                        }).then(() => {
+                            window.location.href = data.redirectUrl;
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: 'error',
+                            title: data.message || 'Logout failed'
+                        });
+                    }
+                } catch (error) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'An error occurred during logout'
                     });
-                });
-            </script>
+                    console.error("Logout failed:", error);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -69,7 +69,45 @@ const addMoney = async (req, res) => {
     }
 };
 
+// for transaction history
+const loadTransactionHistory = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const wallet = await Wallet.findOne({ userId }).lean(); // Use .lean() for better performance with EJS
+
+        if (!wallet) {
+            return res.render("user/wallet/transactions", {
+                user: req.session.user,
+                wallet: { balance: 0, transactions: [] },
+                totalAdded: 0,
+                totalSpent: 0,
+                transactionCount: 0
+            });
+        }
+
+        const totalAdded = wallet.transactions
+            .filter(t => t.type === 'Deposit' && t.status === 'Completed')
+            .reduce((sum, t) => sum + t.amount, 0);
+        const totalSpent = wallet.transactions
+            .filter(t => t.type === 'Purchase' && t.status === 'Completed')
+            .reduce((sum, t) => sum + t.amount, 0);
+        const transactionCount = wallet.transactions.length;
+
+        res.render("user/transactions", {
+            user: req.session.user,
+            wallet,
+            totalAdded,
+            totalSpent,
+            transactionCount
+        });
+    } catch (error) {
+        console.error("[WALLET] Error loading transaction history:", error);
+        res.status(500).render("error", { message: "Server Error" });
+    }
+};
+
 module.exports = {
     loadWallet,
-    addMoney
+    addMoney,
+    loadTransactionHistory
 };

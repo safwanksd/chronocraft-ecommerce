@@ -86,6 +86,7 @@ router.get("/order/:orderId/download-invoice", authMiddleware.requireAuth, authM
 // wallet
 router.get("/wallet", authMiddleware.requireAuth, authMiddleware.checkBlockedStatus, walletController.loadWallet);
 router.post("/wallet/add-money", authMiddleware.requireAuth, authMiddleware.checkBlockedStatus, walletController.addMoney);
+router.get("/wallet/transactions", authMiddleware.requireAuth, authMiddleware.checkBlockedStatus, walletController.loadTransactionHistory);
 
 // Coupon Management Routes
 router.get("/coupon/available", authMiddleware.requireAuth, authMiddleware.checkBlockedStatus, couponController.getAvailableCoupons);

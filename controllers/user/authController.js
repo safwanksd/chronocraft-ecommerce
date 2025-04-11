@@ -73,6 +73,7 @@ const signup = async (req, res) => {
         // Generate OTP and expiration (10 minutes)
         const otp = generateOtp();
         const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        console.log("[SIGNUP] Generated OTP:", otp, "for email:", email);
 
         // Create a new user with unverified status
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -87,6 +88,7 @@ const signup = async (req, res) => {
         });
 
         await newUser.save();
+        console.log("[SIGNUP] User saved successfully with email:", email);
 
         // Store user ID in session for verification
         req.session.userId = newUser._id.toString();
@@ -279,6 +281,7 @@ const resendOtp = async (req, res) => {
 
         const newOtp = generateOtp();
         const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        console.log("[RESEND_OTP] Generated new OTP:", newOtp, "for email:", targetEmail);
 
         // Update OTP in the database
         user.otp = newOtp;

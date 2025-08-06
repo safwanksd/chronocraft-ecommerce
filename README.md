@@ -43,7 +43,7 @@ I deployed ChronoCraft live on an AWS EC2 instance, handling every step from scr
 
 A complete screen-recorded video walkthrough of the live website is available on my LinkedIn. Click the link below to see the platform's features and flow in action!
 
-➡️ **[Watch the ChronoCraft Demo on LinkedIn](https://www.linkedin.com/posts/safwan-ksd_your-post-activity-link-here)**
+➡️ **[Watch the ChronoCraft Demo on LinkedIn](https://www.linkedin.com/posts/safwan-ksd_chronocraft-ecommerce-fullstackdevelopment-activity-7344284612967219201-7UAV?utm_source=share&utm_medium=member_desktop&rcm=ACoAABptc8YBLOLaIzUTMBIV0xY5Fl74hLKDw9Y)**
 
 *(Note: Remember to replace the URL with the direct link to your LinkedIn post.)*
 

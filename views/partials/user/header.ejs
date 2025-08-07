@@ -1,72 +1,75 @@
-<!-- partials/user/header.ejs -->
- 
 <link rel="stylesheet" href="/css/header-footer.css">
 
 <!-- ✅ Navigation -->
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
-        <!-- 🔹 Left Menu -->
-        <div class="navbar-nav">
-            <a class="nav-link" href="/user/men">MEN</a>
-            <a class="nav-link" href="/user/women">WOMEN</a>
-            <a class="nav-link" href="/user/shop">SHOP</a>
-        </div>
+        <!-- 🔹 Hamburger Toggle for Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
         <!-- 🔹 Center Logo -->
-        <a class="navbar-brand mx-auto" href="/">
+        <a class="navbar-brand mx-auto logo-center" href="/">
             <img src="/images/Chronocraft-logo-transp-copy.png" alt="CHRONOCRAFT" height="33">
         </a>
 
-        <!-- 🔹 Right Menu -->
-        <div class="navbar-nav">
-            <!-- 🔹 Profile Hover Dropdown -->
-            <div class="nav-item dropdown profile-dropdown">
-                <a class="nav-link d-flex align-items-center" href="#" id="profileDropdown">
-                    <% if (user) { %>
-                        <span class="user-name me-2">
-                            <%= user.name %>
-                        </span>
+        <!-- 🔹 Collapsible Content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- 🔹 Left Menu -->
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="/user/men">MEN</a>
+                <a class="nav-link" href="/user/women">WOMEN</a>
+                <a class="nav-link" href="/user/shop">SHOP</a>
+            </div>
+
+            <!-- 🔹 Right Menu -->
+            <div class="navbar-nav ms-auto">
+                <!-- 🔹 Profile Hover Dropdown -->
+                <div class="nav-item dropdown profile-dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="profileDropdown">
+                        <% if (user) { %>
+                            <span class="user-name me-2">
+                                <%= user.name %>
+                            </span>
                         <% } %>
-                            <i class="fas fa-user profile-icon"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" id="profileMenu">
-                    <% if (user) { %>
-                        <!-- 🔹 Logged-in User -->
-                        <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item logout-btn" href="/user/logout">Logout</a></li>
+                        <i class="fas fa-user profile-icon"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" id="profileMenu">
+                        <% if (user) { %>
+                            <!-- 🔹 Logged-in User -->
+                            <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item logout-btn" href="/user/logout">Logout</a></li>
                         <% } else { %>
                             <!-- 🔹 Guest User -->
                             <li><a class="dropdown-item" href="/user/login">Login</a></li>
                             <li><a class="dropdown-item" href="/user/signup">Sign Up</a></li>
-                            <% } %>
-                </ul>
+                        <% } %>
+                    </ul>
+                </div>
+                <a class="nav-link position-relative" href="/user/wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="badge bg-danger rounded-pill wishlist-count"
+                        style="display: <%= locals.wishlistCount && wishlistCount > 0 ? 'inline-block' : 'none' %>;">
+                        <%= locals.wishlistCount || 0 %>
+                    </span>
+                </a>
+                <a class="nav-link position-relative" href="/user/cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="badge bg-danger rounded-pill cart-count"
+                        style="display: <%= locals.cartCount && cartCount > 0 ? 'inline-block' : 'none' %>;">
+                        <%= locals.cartCount || 0 %>
+                    </span>
+                </a>
             </div>
-            <a class="nav-link position-relative" href="/user/wishlist">
-                <i class="fas fa-heart"></i>
-                <span class="badge bg-danger rounded-pill wishlist-count"
-                    style="display: <%= locals.wishlistCount && wishlistCount > 0 ? 'inline-block' : 'none' %>;">
-                    <%= locals.wishlistCount || 0 %>
-                </span>
-            </a>
-            <a class="nav-link position-relative" href="/user/cart">
-                <i class="fas fa-shopping-bag"></i>
-                <span class="badge bg-danger rounded-pill cart-count"
-                    style="display: <%= locals.cartCount && cartCount > 0 ? 'inline-block' : 'none' %>;">
-                    <%= locals.cartCount || 0 %>
-                </span>
-            </a>
         </div>
     </div>
 </nav>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-       
-
         // Navbar Scroll Effect
         function handleNavbarScroll() {
             const navbar = document.querySelector('.navbar');
@@ -91,6 +94,7 @@
                 dropdownMenu.style.display = 'block';
                 dropdownMenu.style.opacity = '1';
                 dropdownMenu.style.visibility = 'visible';
+                dropdownMenu.classList.add('show');
                 isOpen = true;
             };
 
@@ -98,12 +102,14 @@
                 timeoutId = setTimeout(() => {
                     dropdownMenu.style.opacity = '0';
                     dropdownMenu.style.visibility = 'hidden';
+                    dropdownMenu.classList.remove('show');
                     setTimeout(() => {
                         if (!isOpen) dropdownMenu.style.display = 'none';
                     }, 300); // Match CSS transition duration
                 }, 200);
             };
 
+            // Desktop: Hover behavior
             profileDropdown.addEventListener('mouseenter', showDropdown);
             profileDropdown.addEventListener('mouseleave', () => {
                 isOpen = false;
@@ -118,14 +124,22 @@
                 hideDropdown();
             });
 
-            // Close dropdown on click outside (optional, can be removed if not needed)
+            // Mobile: Click behavior
+            profileDropdown.addEventListener('click', (e) => {
+                if (window.innerWidth < 992) {
+                    e.preventDefault();
+                    if (isOpen) {
+                        hideDropdown();
+                    } else {
+                        showDropdown();
+                    }
+                }
+            });
+
+            // Close dropdown on click outside
             document.addEventListener('click', (e) => {
                 if (!profileDropdown.contains(e.target) && isOpen) {
-                    dropdownMenu.style.opacity = '0';
-                    dropdownMenu.style.visibility = 'hidden';
-                    setTimeout(() => {
-                        dropdownMenu.style.display = 'none';
-                    }, 300);
+                    hideDropdown();
                     isOpen = false;
                 }
             });

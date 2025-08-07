@@ -12,7 +12,7 @@ const nodemailer = require("nodemailer");
 // Renders a 404 page for invalid routes
 const pageNotFound = async (req, res) => {
     try {
-        res.render("page-404");
+        res.render("/pageNotFound");
     } catch (error) {
         res.redirect("/pageNotFound");
     }

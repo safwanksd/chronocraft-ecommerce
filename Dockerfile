@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Intsall application dependencies 
-RUN npm Intsall
+RUN npm install
 
 # Copy the rest of your application code into container
 COPY . .

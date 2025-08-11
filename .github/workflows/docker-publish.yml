@@ -1,0 +1,31 @@
+# Name of workflow
+name: Docker Image CI
+
+# 1. EVENT: Trigger this workflow on every push to the main branch
+on:
+  push:
+    branches: [ "main" ]
+
+# 2. JOB: Define the sequence of tasks to be executed
+jobs:
+  build_and_push:
+    # 3. RUNNER: The type of virtual server to run the job on
+    runs-on: ubuntu-latest
+
+    # 4. STEPS: The individual commands to be run
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: safwanksd/chronocraft-ecommerce:latest
